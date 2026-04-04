@@ -37,6 +37,7 @@ export default function Topbar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <button
           className="hamburger btn-icon"
+          aria-label="Toggle navigation menu"
           onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
           style={{ flexDirection: 'column', gap: 4, padding: 8 }}
         >
@@ -72,6 +73,7 @@ export default function Topbar() {
         {/* Theme toggle */}
         <button
           className="btn-icon"
+          aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           onClick={() => dispatch({ type: 'TOGGLE_THEME' })}
           title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           onMouseEnter={e => e.currentTarget.style.transform = 'rotate(22deg)'}

@@ -14,23 +14,32 @@ const fmtSh = (n) => {
   return '₹' + n;
 };
 
-/* ── Animated Counter Hook ── */
-function useCountUp(target, duration = 900) {
-  const [val, setVal] = useState(0);
-  const prev = useRef(0);
+/* ── Animated Counter Hook ──
+   Animates from 0 only on first render. On subsequent page visits
+   the value appears instantly (no slot-machine effect).
+   Re-animates only when the underlying data actually changes. */
+const _counterCache = {};
+function useCountUp(target, duration = 900, key = '') {
+  const cacheKey = key || String(target);
+  const cached = _counterCache[cacheKey];
+  const [val, setVal] = useState(cached ?? 0);
+  const prev = useRef(cached ?? 0);
   useEffect(() => {
     const start = prev.current;
     prev.current = target;
+    if (start === target) { setVal(target); return; }
     let startTime = null;
     const step = (ts) => {
       if (!startTime) startTime = ts;
       const p = Math.min((ts - startTime) / duration, 1);
       const ease = 1 - Math.pow(1 - p, 4);
-      setVal(Math.round(start + (target - start) * ease));
+      const v = Math.round(start + (target - start) * ease);
+      setVal(v);
       if (p < 1) requestAnimationFrame(step);
+      else _counterCache[cacheKey] = target;
     };
     requestAnimationFrame(step);
-  }, [target, duration]);
+  }, [target, duration, cacheKey]);
   return val;
 }
 
@@ -60,7 +69,7 @@ function HealthScoreRing({ score }) {
   const dash = circ * (score / 100);
   const color = score >= 70 ? 'var(--green)' : score >= 45 ? 'var(--amber)' : 'var(--red)';
   const label = score >= 70 ? 'Excellent' : score >= 55 ? 'Good' : score >= 40 ? 'Fair' : 'Needs Work';
-  const animScore = useCountUp(score, 1200);
+  const animScore = useCountUp(score, 1200, 'health');
 
   return (
     <div className="health-score-card anim-up d-3" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
@@ -113,7 +122,7 @@ function HealthScoreRing({ score }) {
 
 /* ── KPI Card ── */
 function KPICard({ label, value, numValue, color, pill, pillUp, sub, icon, delay, glow }) {
-  const animated = useCountUp(numValue || 0, 900);
+  const animated = useCountUp(numValue || 0, 900, `kpi-${label}`);
   const displayVal = numValue !== undefined
     ? (label === 'Transactions' ? String(animated) : fmt(animated))
     : value;
@@ -147,7 +156,7 @@ function KPICard({ label, value, numValue, color, pill, pillUp, sub, icon, delay
 
 /* ── Projected Balance Card ── */
 function ProjectedCard({ projected, delay }) {
-  const animated = useCountUp(Math.abs(projected), 900);
+  const animated = useCountUp(Math.abs(projected), 900, 'projected');
   const isPos = projected >= 0;
   return (
     <div className={`metric-card anim-up d-${delay}`}>

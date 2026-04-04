@@ -54,7 +54,7 @@ export default function AddTransactionModal({ onClose, editTx }) {
             <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.4px' }}>{isEdit ? 'Edit Transaction' : 'Add Transaction'}</div>
             <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 3 }}>{isEdit ? 'Update the transaction details below' : 'Log a new income or expense'}</div>
           </div>
-          <button className="btn-icon" onClick={onClose}>
+          <button className="btn-icon" onClick={onClose} aria-label="Close modal">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
           </button>
         </div>
@@ -71,7 +71,7 @@ export default function AddTransactionModal({ onClose, editTx }) {
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form onSubmit={e => { e.preventDefault(); submit(); }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Description */}
           <div className="form-group">
             <label className="form-label">Description *</label>
@@ -132,11 +132,11 @@ export default function AddTransactionModal({ onClose, editTx }) {
 
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button className="btn-ghost" style={{ flex: 1 }} onClick={onClose}>Cancel</button>
-            <button className="btn-primary" style={{ flex: 1.5 }} onClick={submit}>
+            <button className="btn-primary" type="submit" style={{ flex: 1.5 }}>
               {isEdit ? 'Save Changes' : `Add ${type === 'income' ? 'Income' : 'Expense'}`}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

@@ -200,6 +200,7 @@ select,input{font-family:inherit}
 .app-shell{display:flex;height:100dvh;overflow:hidden;background:var(--bg-base);position:relative}
 .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative;z-index:1}
 .page-scroll{flex:1;overflow-y:auto;padding:28px 32px 56px;scroll-behavior:smooth}
+.page-scroll>*{max-width:1400px}
 
 /* ══════════════════════════════════════════════════
    SIDEBAR
@@ -687,6 +688,22 @@ select.input{
   .form-row{grid-template-columns:1fr}
   .trio-grid{grid-template-columns:1fr}
   .role-switcher{display:none}
+}
+
+@media(max-width:768px){
+  /* Transaction table → card morphing */
+  .tx-header{display:none !important}
+  .tx-row{
+    display:flex !important;flex-wrap:wrap;gap:8px;
+    padding:14px 16px !important;
+    border:1px solid var(--b-sm) !important;
+    border-radius:var(--r-md);margin:6px 12px;
+    background:var(--bg-card);
+  }
+  .tx-row>*:first-child{flex:1;min-width:0}
+  .tx-row .tx-actions{
+    position:absolute;top:10px;right:10px;
+  }
 }
 
 @media(max-width:600px){

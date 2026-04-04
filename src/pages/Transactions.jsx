@@ -222,7 +222,7 @@ export default function Transactions() {
       {/* ── Table ── */}
       <div className="card anim-up d-5">
         {/* Header */}
-        <div style={{ display: 'grid', gridTemplateColumns: gridCols, padding: '12px 20px', borderBottom: '1px solid var(--b-sm)', gap: 8 }}>
+        <div className="tx-header" style={{ display: 'grid', gridTemplateColumns: gridCols, padding: '12px 20px', borderBottom: '1px solid var(--b-sm)', gap: 8 }}>
           {COLS.map(col => (
             <div
               key={col.label || 'actions'}
@@ -287,12 +287,12 @@ export default function Transactions() {
                 {/* Actions */}
                 {isAdmin && (
                   <div className="tx-actions" style={{ justifyContent: 'flex-end', gap: 4 }}>
-                    <button className="btn-icon" style={{ width: 30, height: 30 }} onClick={() => openEdit(tx)} title="Edit">
+                    <button className="btn-icon" style={{ width: 30, height: 30 }} onClick={() => openEdit(tx)} title="Edit" aria-label={`Edit ${tx.name}`}>
                       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                         <path d="M11.5 2.5a1.5 1.5 0 012.12 2.12l-9 9L2 14.5l.88-2.62 9-9z"/>
                       </svg>
                     </button>
-                    <button className="btn-icon" style={{ width: 30, height: 30, color: 'var(--red)' }} onClick={() => setDelConfirm(tx)} title="Delete">
+                    <button className="btn-icon" style={{ width: 30, height: 30, color: 'var(--red)' }} onClick={() => setDelConfirm(tx)} title="Delete" aria-label={`Delete ${tx.name}`}>
                       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                         <path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10"/>
                       </svg>
