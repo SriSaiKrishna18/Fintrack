@@ -37,7 +37,7 @@ function KeyboardShortcutsModal({ onClose }) {
             <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 4px', borderBottom: '1px solid var(--b-xs)' }}>
               <span style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 500 }}>{desc}</span>
               <kbd style={{
-                fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
+                fontFamily: state.theme === 'light' ? "'DM Mono',monospace" : "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
                 padding: '3px 10px', borderRadius: 8,
                 background: 'var(--bg-elevated)', border: '1px solid var(--b-md)',
                 color: 'var(--accent)', boxShadow: '0 2px 4px rgba(0,0,0,0.15)',

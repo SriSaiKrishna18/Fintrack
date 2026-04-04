@@ -60,7 +60,7 @@ The dashboard ships with **5 full pages**, a comprehensive design system, dark/l
 
 | Feature | Details |
 |---|---|
-| **Dark / Light Mode** | Full dual theme via CSS custom properties. Theme persisted to localStorage. |
+| **Dark / Light Mode** | Full dual theme via CSS custom properties. Light mode features a premium "Morning Mist" atmospheric design with warm sand/mist/lavender gradient backgrounds, frosted glassmorphism surfaces (backdrop-filter: blur), and refined warm shadows. Theme persisted to localStorage. |
 | **Data Persistence** | Transactions, budgets, and savings goals all saved to localStorage. Survive page refresh. |
 | **CSV + JSON Export** | Both formats available from the Topbar export dropdown. Also available in the Transactions page. |
 | **Budget Tracker** | Full Budgets page: per-category limits, visual progress bars, over-budget alerts, near-limit warnings, best-practice tips. |
@@ -143,8 +143,9 @@ All application state lives in a single `AppContext` powered by `useReducer`. Th
 The entire visual identity is built on **CSS Custom Properties** (design tokens):
 - **40+ tokens** covering backgrounds, borders, text, colors, shadows, gradients, radius, timing
 - **Two complete themes** (dark/light) — switching just toggles a class on `<html>`
-- **Typography**: Inter (UI text) + JetBrains Mono (all numeric values — prevents layout jitter)
-- **Color palette**: Deep navy (`#04070e`) base, electric teal (`#00f0c8`) accent — inspired by Stripe Dashboard and Linear
+- **Two complete themes** (dark/light) — switching just toggles a class on `<html>`. Light mode features the "Morning Mist" atmospheric palette (warm sand → cool mist → soft lavender gradient) with frosted glassmorphism surfaces.
+- **Semantic Typography**: DM Mono for all tabular and financial data (prevents kerning jitter on value updates), DM Sans for UI elements in light mode, Playfair Display for editorial warmth in branding. Inter + JetBrains Mono in dark mode.
+- **Color palette**: Dark — deep navy (`#04070e`) base, electric teal (`#00f0c8`) accent. Light — warm sand (`#f5f0ea`) base, emerald (`#2d8a6e`) accent, slate (`#4a6080`) secondary, rose (`#c45a5a`) danger, amber (`#b8762a`) warning, lavender (`#6e5a9a`) projections.
 
 ### Financial Health Score Algorithm
 The score (0–100) weighs four pillars:

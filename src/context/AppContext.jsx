@@ -3,7 +3,7 @@ import { INITIAL_TRANSACTIONS } from '../data/mockData';
 
 const AppContext = createContext(null);
 
-const savedTheme   = localStorage.getItem('ft_theme')   || 'dark';
+const savedTheme   = localStorage.getItem('ft_theme')   || 'light';
 const savedTxs     = JSON.parse(localStorage.getItem('ft_txs')     || 'null');
 const savedBudgets = JSON.parse(localStorage.getItem('ft_budgets') || 'null');
 const savedGoals   = JSON.parse(localStorage.getItem('ft_goals')   || 'null');
@@ -16,9 +16,9 @@ const DEFAULT_BUDGETS = {
 };
 
 const DEFAULT_GOALS = [
-  { id: 1, name: 'Emergency Fund', target: 300000, current: 125000, icon: '🛡️', color: '#00f0c8' },
-  { id: 2, name: 'Vacation — Europe', target: 150000, current: 42000, icon: '✈️', color: '#4d9fff' },
-  { id: 3, name: 'MacBook Pro', target: 180000, current: 60000, icon: '💻', color: '#c47eff' },
+  { id: 1, name: 'Emergency Fund', target: 300000, current: 125000, icon: '🛡️', color: '#2d8a6e' },
+  { id: 2, name: 'Vacation — Europe', target: 150000, current: 42000, icon: '✈️', color: '#4a6080' },
+  { id: 3, name: 'MacBook Pro', target: 180000, current: 60000, icon: '💻', color: '#6e5a9a' },
 ];
 
 export const initialState = {

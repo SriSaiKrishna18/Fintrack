@@ -64,6 +64,8 @@ function ChartTip({ active, payload, label }) {
 
 /* ── Financial Health Score Ring ── */
 function HealthScoreRing({ score }) {
+  const { state } = useApp();
+  const isLight = state.theme === 'light';
   const r = 44;
   const circ = 2 * Math.PI * r;
   const dash = circ * (score / 100);
@@ -84,16 +86,16 @@ function HealthScoreRing({ score }) {
             strokeDashoffset={0}
             style={{ stroke: color, strokeDasharray: `${circ * (animScore / 100)} ${circ}`, transform: 'rotate(-90deg)', transformOrigin: 'center', transition: 'stroke-dasharray 0.05s linear' }}
           />
-          <text x={55} y={50} textAnchor="middle" fill={color} fontSize={20} fontWeight={800} fontFamily="'JetBrains Mono',monospace">
+          <text x={55} y={50} textAnchor="middle" fill={color} fontSize={20} fontWeight={isLight ? 500 : 800} fontFamily={isLight ? "'DM Mono',monospace" : "'JetBrains Mono',monospace"}>
             {animScore}
           </text>
-          <text x={55} y={66} textAnchor="middle" fill="var(--t3)" fontSize={9} fontWeight={600} fontFamily="Inter" textTransform="uppercase" letterSpacing="0.5">
+          <text x={55} y={66} textAnchor="middle" fill="var(--t3)" fontSize={9} fontWeight={600} fontFamily={isLight ? "'DM Sans',sans-serif" : "Inter"} textTransform="uppercase" letterSpacing="0.5">
             /100
           </text>
         </svg>
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.9px', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6 }}>Financial Health</div>
+        <div className="lbl" style={{ marginBottom: 6 }}>Financial Health</div>
         <div style={{ fontSize: 20, fontWeight: 800, color, letterSpacing: '-0.5px', marginBottom: 6 }}>{label}</div>
         <div style={{ fontSize: 11.5, color: 'var(--t3)', lineHeight: 1.6, marginBottom: 10 }}>
           Based on savings rate, budget adherence, income diversity & investment habits.
@@ -122,6 +124,8 @@ function HealthScoreRing({ score }) {
 
 /* ── KPI Card ── */
 function KPICard({ label, value, numValue, color, pill, pillUp, sub, icon, delay, glow }) {
+  const { state } = useApp();
+  const isLight = state.theme === 'light';
   const animated = useCountUp(numValue || 0, 900, `kpi-${label}`);
   const displayVal = numValue !== undefined
     ? (label === 'Transactions' ? String(animated) : fmt(animated))
@@ -136,12 +140,12 @@ function KPICard({ label, value, numValue, color, pill, pillUp, sub, icon, delay
           {icon}
         </div>
       </div>
-      <div className="mono count-anim" style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-1.5px', color, lineHeight: 1, marginBottom: 12 }}>
+      <div className="mono count-anim" style={{ fontSize: isLight ? 24 : 26, fontWeight: isLight ? 500 : 700, letterSpacing: '-1.5px', color, lineHeight: 1, marginBottom: 12 }}>
         {displayVal}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
         <span style={{
-          fontSize: 10.5, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 10.5, fontWeight: 700, fontFamily: isLight ? "'DM Mono', monospace" : "'JetBrains Mono', monospace",
           padding: '3px 8px', borderRadius: 99,
           background: pillUp ? 'var(--income-bg)' : 'var(--expense-bg)',
           color: pillUp ? 'var(--income)' : 'var(--expense)',
@@ -260,8 +264,8 @@ export default function Overview() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 10.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={6} />
-              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 10.5, fontFamily: state.theme === 'light' ? 'DM Sans' : 'Inter' }} axisLine={false} tickLine={false} dy={6} />
+              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: state.theme === 'light' ? 'DM Mono' : 'JetBrains Mono' }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTip />} cursor={{ stroke: 'var(--b-lg)', strokeWidth: 1, strokeDasharray: '4 4' }} />
               <Area type="monotone" dataKey="income"  name="Income"  stroke="var(--income)"  strokeWidth={2.5} fill="url(#gI)" dot={false} activeDot={{ r: 5, fill: 'var(--income)',  strokeWidth: 0 }} />
               <Area type="monotone" dataKey="expense" name="Expense" stroke="var(--expense)" strokeWidth={2.5} fill="url(#gE)" dot={false} activeDot={{ r: 5, fill: 'var(--expense)', strokeWidth: 0 }} />

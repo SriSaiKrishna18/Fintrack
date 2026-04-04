@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useApp } from '../context/AppContext';
 import { useFinanceCalc } from '../hooks/useFinanceCalc';
 import { CATEGORIES, MONTHLY_HISTORY } from '../data/mockData';
 import {
@@ -86,6 +87,8 @@ function buildObs(totals, savingsRate, top, second, expDiff) {
 }
 
 export default function Insights() {
+  const { state } = useApp();
+  const isLight = state.theme === 'light';
   const { totals, savingsRate, categorySpend, fullChartData } = useFinanceCalc();
   const [activeMonth, setActiveMonth] = useState(null);
 
@@ -210,8 +213,8 @@ export default function Insights() {
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyData} barCategoryGap="28%" barGap={4} margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 11, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
-              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 11, fontFamily: isLight ? 'DM Sans' : 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: isLight ? 'DM Mono' : 'JetBrains Mono' }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)', radius: 6 }} />
               <Bar dataKey="income"  fill="var(--income)"  fillOpacity={0.75} radius={[6, 6, 0, 0]} name="Income" />
               <Bar dataKey="expense" fill="var(--expense)" fillOpacity={0.65} radius={[6, 6, 0, 0]} name="Expense" />
@@ -229,8 +232,8 @@ export default function Insights() {
             <ResponsiveContainer width="100%" height={Math.max(220, catBarData.length * 34)}>
               <BarChart data={catBarData} layout="vertical" barCategoryGap="22%" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" horizontal={false} />
-                <XAxis type="number" tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 9.5, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} width={90} />
+                <XAxis type="number" tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 9.5, fontFamily: isLight ? 'DM Mono' : 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+                <YAxis dataKey="name" type="category" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: isLight ? 'DM Sans' : 'Inter' }} axisLine={false} tickLine={false} width={90} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)' }} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} name="Spent">
                   {catBarData.map((entry, i) => (
@@ -268,8 +271,8 @@ export default function Insights() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-            <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 10.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={6} />
-            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 10.5, fontFamily: isLight ? 'DM Sans' : 'Inter' }} axisLine={false} tickLine={false} dy={6} />
+            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: isLight ? 'DM Mono' : 'JetBrains Mono' }} axisLine={false} tickLine={false} />
             <Tooltip content={<ChartTip />} />
             <ReferenceLine y={30} stroke="var(--green)" strokeDasharray="6 3" strokeOpacity={0.5}
               label={{ value: '30% target', position: 'insideTopRight', fill: 'var(--green)', fontSize: 10, fontFamily: 'Inter', fontWeight: 600 }}

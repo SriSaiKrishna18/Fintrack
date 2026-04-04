@@ -29,6 +29,7 @@ export default function Topbar() {
   const { state, dispatch, toast } = useApp();
   const meta = PAGE_META[state.page] || PAGE_META.overview;
   const isDark = state.theme === 'dark';
+  const isLight = state.theme === 'light';
   const [showExport, setShowExport] = useState(false);
 
   return (
@@ -49,7 +50,7 @@ export default function Topbar() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--accent-bg)', border: '1px solid rgba(0,240,200,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: 'var(--accent)', fontWeight: 800, flexShrink: 0 }}>{meta.icon}</div>
-            <h1 style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.4px', color: 'var(--t1)' }}>{meta.title}</h1>
+            <h1 style={{ fontSize: 15, fontWeight: isLight ? 600 : 800, letterSpacing: '-0.4px', color: 'var(--t1)', fontFamily: isLight ? "'DM Sans', sans-serif" : "'Inter', sans-serif" }}>{meta.title}</h1>
           </div>
           <p style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2, fontWeight: 500, marginLeft: 36 }}>{meta.sub}</p>
         </div>
@@ -109,7 +110,7 @@ export default function Topbar() {
           {showExport && (
             <>
               <div style={{ position: 'fixed', inset: 0, zIndex: 49 }} onClick={() => setShowExport(false)} />
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: 'var(--bg-elevated)', border: '1px solid var(--b-md)', borderRadius: 'var(--r-md)', boxShadow: 'var(--shadow-md)', zIndex: 50, minWidth: 160, overflow: 'hidden', animation: 'fadeIn 0.1s ease' }}>
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: isLight ? 'rgba(255,255,255,0.97)' : 'var(--bg-elevated)', border: `1px solid ${isLight ? 'rgba(180,165,148,0.38)' : 'var(--b-md)'}`, borderRadius: 'var(--r-md)', boxShadow: 'var(--shadow-md)', zIndex: 50, minWidth: 160, overflow: 'hidden', animation: 'fadeIn 0.1s ease', backdropFilter: isLight ? 'blur(16px)' : 'none' }}>
                 {[
                   { label: 'Export CSV', action: () => { exportCSV(state.transactions); toast?.('Exported as CSV', 'success'); setShowExport(false); } },
                   { label: 'Export JSON', action: () => { exportJSON(state.transactions); toast?.('Exported as JSON', 'success'); setShowExport(false); } },

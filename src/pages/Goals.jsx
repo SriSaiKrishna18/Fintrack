@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 const fmt = (n) => '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN');
 
 const ICON_OPTIONS = ['🏠','✈️','💻','🚗','🎓','💍','🏋️','📱','🛡️','💰','🌴','🎯','🎸','📚'];
-const COLOR_OPTIONS = ['#00f0c8','#4d9fff','#c47eff','#ffb340','#ff7c6e','#ff5c7a','#00d4ff','#a0c040'];
+const COLOR_OPTIONS = ['#2d8a6e','#4a6080','#6e5a9a','#b8762a','#c45a5a','#00f0c8','#4d9fff','#c47eff'];
 
 function GoalModal({ goal, onSave, onClose }) {
   const [name, setName]       = useState(goal?.name || '');

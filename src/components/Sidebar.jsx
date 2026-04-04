@@ -1,6 +1,12 @@
 import { useApp } from '../context/AppContext';
 import { useFinanceCalc } from '../hooks/useFinanceCalc';
 
+// Atmospheric sparkline heights for light mode (warmer feel)
+const LIGHT_SPARK_COLORS = (h, isLast) => {
+  if (isLast) return 'var(--accent)';
+  return `rgba(45,138,110,${0.12 + h * 0.20})`;
+};
+
 const fmt = (n) => '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN');
 
 const NAV = [
@@ -56,6 +62,7 @@ export default function Sidebar() {
   const { state, dispatch } = useApp();
   const { totals, savingsRate, budgetUsage } = useFinanceCalc();
   const isOpen = state.sidebarOpen;
+  const isLight = state.theme === 'light';
 
   const overBudgetCount = budgetUsage.filter(b => b.over && b.budget > 0).length;
   const goalsCompleted  = state.goals?.filter(g => g.current >= g.target).length || 0;
@@ -71,11 +78,15 @@ export default function Sidebar() {
             </svg>
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: '-0.5px', lineHeight: 1.1, color: 'var(--t1)' }}>
+            <div style={{
+              fontSize: 16, fontWeight: isLight ? 600 : 800,
+              letterSpacing: '-0.5px', lineHeight: 1.1, color: 'var(--t1)',
+              fontFamily: isLight ? "'Playfair Display', serif" : "'Inter', sans-serif",
+            }}>
               Fin<span style={{ color: 'var(--accent)' }}>Track</span>
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent)', background: 'var(--accent-bg)', padding: '1px 5px', borderRadius: 4, marginLeft: 5, verticalAlign: 'middle', letterSpacing: '0.5px' }}>PRO</span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent)', background: 'var(--accent-bg)', padding: '1px 5px', borderRadius: 4, marginLeft: 5, verticalAlign: 'middle', letterSpacing: '0.5px', fontFamily: isLight ? "'DM Sans', sans-serif" : "'Inter', sans-serif" }}>PRO</span>
             </div>
-            <div style={{ fontSize: 9.5, color: 'var(--t3)', letterSpacing: '0.8px', fontWeight: 600, textTransform: 'uppercase', marginTop: 2 }}>Finance Dashboard</div>
+            <div style={{ fontSize: 9.5, color: 'var(--t3)', letterSpacing: '0.8px', fontWeight: 600, textTransform: 'uppercase', marginTop: 2, fontFamily: isLight ? "'DM Sans', sans-serif" : 'inherit' }}>Finance Dashboard</div>
           </div>
         </div>
       </div>
@@ -102,7 +113,11 @@ export default function Sidebar() {
           {[0.4, 0.55, 0.48, 0.72, 0.62, 0.78, savingsRate > 0 ? Math.min(savingsRate / 40, 1) : 0.3].map((h, i) => (
             <div key={i} className="sparkline-bar" style={{
               height: `${h * 100}%`,
-              background: i === 6 ? 'var(--accent)' : `rgba(0,240,200,${0.15 + h * 0.18})`,
+              background: i === 6
+                ? 'var(--accent)'
+                : isLight
+                  ? LIGHT_SPARK_COLORS(h, false)
+                  : `rgba(0,240,200,${0.15 + h * 0.18})`,
             }} />
           ))}
         </div>
@@ -159,6 +174,7 @@ export default function Sidebar() {
             border: `1px solid ${state.role === 'admin' ? 'rgba(0,240,200,0.2)' : 'var(--b-sm)'}`,
             borderRadius: 'var(--r-sm)',
             fontSize: 10.5, fontWeight: 700,
+            fontFamily: isLight ? "'DM Sans', sans-serif" : 'inherit',
             color: state.role === 'admin' ? 'var(--accent)' : 'var(--t3)',
             cursor: 'pointer', transition: 'all var(--tb)',
           }} onClick={() => dispatch({ type: 'SET_ROLE', payload: 'admin' })}>🔑 Admin</div>
@@ -168,6 +184,7 @@ export default function Sidebar() {
             border: `1px solid ${state.role === 'viewer' ? 'rgba(77,159,255,0.2)' : 'var(--b-sm)'}`,
             borderRadius: 'var(--r-sm)',
             fontSize: 10.5, fontWeight: 700,
+            fontFamily: isLight ? "'DM Sans', sans-serif" : 'inherit',
             color: state.role === 'viewer' ? 'var(--blue)' : 'var(--t3)',
             cursor: 'pointer', transition: 'all var(--tb)',
           }} onClick={() => dispatch({ type: 'SET_ROLE', payload: 'viewer' })}>👁 Viewer</div>
