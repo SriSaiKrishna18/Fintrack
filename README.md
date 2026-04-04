@@ -24,18 +24,22 @@
 
 ```bash
 npm install
-npm run dev
+npm run dev        # Start dev server at http://localhost:5173
+npm test           # Run 20 unit tests
+npm run build      # Production build
 ```
 
 Open [http://localhost:5173](http://localhost:5173)
 
-> **Stack:** React 18 · Recharts · Vite · Context API + useReducer · CSS Custom Properties · date-fns
+> **Stack:** React 18 · Recharts · Vite · Vitest · Context API + useReducer · CSS Custom Properties · date-fns
 
 ---
 
 ## Screenshots
 
 The dashboard ships with **5 full pages**, a comprehensive design system, dark/light themes, and 40 mock transactions seeded across 15 categories.
+
+![FinTrack Pro Dashboard — Dark Mode Overview](preview.png)
 
 ---
 
@@ -72,6 +76,8 @@ The dashboard ships with **5 full pages**, a comprehensive design system, dark/l
 | **Welcome Banner** | First-time user onboarding banner with feature highlights. Dismissible, persisted via localStorage. |
 | **Reset Demo Data** | One-click restore of original 40 transactions from the Transactions page for easy evaluation. |
 | **SVG Favicon** | Custom inline SVG favicon matching the brand identity — no external file required. |
+| **JSON Export** | Export filtered transactions as JSON alongside CSV for data portability. |
+| **Unit Tests** | 20 tests covering financial calculations, health score, budget tracking, and chart data using Vitest. |
 
 ---
 
@@ -80,11 +86,14 @@ The dashboard ships with **5 full pages**, a comprehensive design system, dark/l
 ```
 src/
 ├── context/
-│   └── AppContext.jsx          # Global state + reducer (10 action types) + toast helper
+│   └── AppContext.jsx          # Global state + reducer (15+ action types) + toast helper
 ├── data/
 │   └── mockData.js             # 40 transactions, 15 categories, monthly history
 ├── hooks/
 │   └── useFinanceCalc.js       # All derived finance calculations (memoized)
+├── test/
+│   ├── setup.js                # Vitest test setup (localStorage mock)
+│   └── useFinanceCalc.test.js  # 20 unit tests for financial calculations
 ├── components/
 │   ├── Sidebar.jsx             # Nav (5 items), balance card, sparkline, role toggle, user card
 │   ├── Topbar.jsx              # Page title, date range, theme, export dropdown, role switcher

@@ -72,6 +72,14 @@ export default function Transactions() {
     toast?.('Exported as CSV', 'success');
   };
 
+  const exportJSON = () => {
+    const data = filteredTxs.map(({ id, date, name, cat, type, amount }) => ({ id, date, description: name, category: cat, type, amount }));
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'fintrack_transactions.json' });
+    a.click(); URL.revokeObjectURL(a.href);
+    toast?.(`Exported ${data.length} transactions as JSON`, 'success');
+  };
+
   const COLS = [
     { label: 'Description', key: 'name',   span: '2.5fr' },
     { label: 'Date',        key: 'date',   span: '1fr'   },
@@ -181,6 +189,10 @@ export default function Transactions() {
             <button className="btn-ghost" style={{ fontSize: 12, padding: '7px 12px' }} onClick={exportCSV}>
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M8 2v9M5 8l3 3 3-3M2 13h12"/></svg>
               CSV
+            </button>
+            <button className="btn-ghost" style={{ fontSize: 12, padding: '7px 12px' }} onClick={exportJSON}>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 2v3c0 1-1 2-2 2s2 1 2 2v3M12 2v3c0 1 1 2 2 2s-2 1-2 2v3"/></svg>
+              JSON
             </button>
             {isAdmin && (
               <>

@@ -227,25 +227,42 @@ select,input{font-family:inherit}
 .logo-mark:hover{transform:scale(1.05);box-shadow:0 6px 24px var(--accent-glow)}
 .sidebar-balance{
   margin:12px 14px 6px;
-  background:linear-gradient(145deg, #0a1e2a 0%, #081520 100%);
-  border:1px solid rgba(0,240,200,0.25);border-radius:var(--r-lg);
-  padding:18px;position:relative;overflow:hidden;
-  box-shadow:0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(0,240,200,0.08);
+  background:#081a28;
+  border:1px solid rgba(0,240,200,0.3);border-radius:var(--r-lg);
+  padding:18px 18px 14px;position:relative;
+  box-shadow:0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,240,200,0.1);
 }
+.sidebar-balance>*{position:relative;z-index:2}
 .light .sidebar-balance{
-  background:linear-gradient(145deg, #e8f5f0 0%, #dceef8 100%);
-  border:1px solid rgba(0,158,132,0.25);
+  background:#e4f2ed;
+  border:1px solid rgba(0,158,132,0.3);
   box-shadow:0 4px 16px rgba(0,0,0,0.06);
+}
+.balance-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.9px;margin-bottom:8px;
+  color:#00f0c8 !important;
+}
+.light .balance-label{color:#009e84 !important}
+.balance-amount{
+  font-size:26px !important;font-weight:900 !important;
+  color:#ffffff !important;
+  letter-spacing:-1px;line-height:1;margin-bottom:10px;
+  text-shadow:0 0 24px rgba(0,240,200,0.5), 0 2px 8px rgba(0,0,0,0.6);
+}
+.light .balance-amount{
+  color:#0b3d2e !important;
+  text-shadow:none;
 }
 .sidebar-balance::before{
   content:'';position:absolute;top:-24px;right:-24px;
-  width:90px;height:90px;
-  background:radial-gradient(circle,rgba(0,240,200,0.15) 0%,transparent 70%);
+  width:90px;height:90px;z-index:1;
+  background:radial-gradient(circle,rgba(0,240,200,0.12) 0%,transparent 70%);
   pointer-events:none;
 }
 .sidebar-balance::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg, #00f0c8, #4d9fff);
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:1;
+  background:linear-gradient(90deg, #00f0c8, #4d9fff, #c47eff);
   border-radius:var(--r-lg) var(--r-lg) 0 0;
 }
 .nav-section-lbl{
