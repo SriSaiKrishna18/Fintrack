@@ -169,7 +169,7 @@ export default function Insights() {
             Income: {fmt(totals.income)}
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+        <div className="trio-grid">
           {[
             { label: '50% Needs', budget: needs,  color: 'var(--blue)',   desc: 'Rent, utilities, groceries', icon: '🏠' },
             { label: '30% Wants', budget: wants,  color: 'var(--purple)', desc: 'Dining, entertainment, travel', icon: '🎯' },
@@ -187,7 +187,7 @@ export default function Insights() {
       </div>
 
       {/* ── Charts Row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+      <div className="charts-row-alt">
 
         {/* Monthly bar comparison */}
         <div className="card card-p anim-up d-7">

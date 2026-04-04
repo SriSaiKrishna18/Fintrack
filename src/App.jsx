@@ -120,7 +120,7 @@ function AppShell() {
 
       <div className="main-area">
         <Topbar />
-        <main key={state.page} className="page-scroll anim-up d-0">
+        <main id="main-content" key={state.page} className="page-scroll anim-up d-0">
           <Page />
         </main>
       </div>

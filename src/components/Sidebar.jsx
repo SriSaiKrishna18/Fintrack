@@ -82,8 +82,8 @@ export default function Sidebar() {
 
       {/* Balance Card */}
       <div className="sidebar-balance">
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 6 }}>Net Balance</div>
-        <div className="mono" style={{ fontSize: 24, fontWeight: 800, color: 'var(--t1)', letterSpacing: '-1px', lineHeight: 1, marginBottom: 8, textShadow: '0 1px 8px rgba(0,240,200,0.3)' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: '#00f0c8', textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 8 }}>Net Balance</div>
+        <div className="mono" style={{ fontSize: 26, fontWeight: 900, color: '#ffffff', letterSpacing: '-1px', lineHeight: 1, marginBottom: 10, textShadow: '0 0 20px rgba(0,240,200,0.4), 0 2px 4px rgba(0,0,0,0.5)' }}>
           {fmt(totals.balance)}
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>

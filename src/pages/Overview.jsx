@@ -224,7 +224,7 @@ export default function Overview() {
       <HealthScoreRing score={healthScore} />
 
       {/* ── Charts Row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '5fr 3fr', gap: 16 }}>
+      <div className="charts-row">
 
         {/* Area Chart */}
         <div className="card card-p anim-up d-4">

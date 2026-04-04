@@ -227,15 +227,26 @@ select,input{font-family:inherit}
 .logo-mark:hover{transform:scale(1.05);box-shadow:0 6px 24px var(--accent-glow)}
 .sidebar-balance{
   margin:12px 14px 6px;
-  background:linear-gradient(135deg,rgba(0,240,200,0.07) 0%,rgba(77,159,255,0.05) 100%);
-  border:1px solid var(--b-md);border-radius:var(--r-lg);
-  padding:16px;position:relative;overflow:hidden;
+  background:linear-gradient(145deg, #0a1e2a 0%, #081520 100%);
+  border:1px solid rgba(0,240,200,0.25);border-radius:var(--r-lg);
+  padding:18px;position:relative;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(0,240,200,0.08);
+}
+.light .sidebar-balance{
+  background:linear-gradient(145deg, #e8f5f0 0%, #dceef8 100%);
+  border:1px solid rgba(0,158,132,0.25);
+  box-shadow:0 4px 16px rgba(0,0,0,0.06);
 }
 .sidebar-balance::before{
   content:'';position:absolute;top:-24px;right:-24px;
   width:90px;height:90px;
-  background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
+  background:radial-gradient(circle,rgba(0,240,200,0.15) 0%,transparent 70%);
   pointer-events:none;
+}
+.sidebar-balance::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, #00f0c8, #4d9fff);
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
 }
 .nav-section-lbl{
   padding:14px 20px 6px;font-size:10px;font-weight:700;
@@ -631,6 +642,13 @@ select.input{
 .d-9{animation-delay:540ms}
 
 /* ══════════════════════════════════════════════════
+   RESPONSIVE GRID HELPERS
+══════════════════════════════════════════════════ */
+.charts-row{display:grid;grid-template-columns:5fr 3fr;gap:16px}
+.charts-row-alt{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.trio-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* ══════════════════════════════════════════════════
    MOBILE
 ══════════════════════════════════════════════════ */
 .hamburger{display:none}
@@ -639,19 +657,54 @@ select.input{
   backdrop-filter:blur(6px);animation:fadeIn .2s ease;
 }
 
+@media(max-width:1100px){
+  .charts-row{grid-template-columns:1fr}
+  .charts-row-alt{grid-template-columns:1fr}
+}
+
 @media(max-width:900px){
   .sidebar{position:fixed;top:0;left:0;bottom:0;transform:translateX(-100%);z-index:20}
   .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
   .hamburger{display:flex}
   .page-scroll{padding:20px 18px 44px}
   .form-row{grid-template-columns:1fr}
+  .trio-grid{grid-template-columns:1fr}
+  .role-switcher{display:none}
 }
+
 @media(max-width:600px){
-  .topbar{padding:0 16px;height:56px}
+  .topbar{padding:0 16px;height:56px;gap:8px}
+  .topbar h1{font-size:13px !important}
+  .topbar p{display:none}
   .page-scroll{padding:14px 12px 40px}
   .metric-card{padding:16px}
-  .card-p{padding:18px}
+  .card-p{padding:16px}
   .kbd-hint{display:none}
+  .welcome-banner{padding:16px 18px}
+  .charts-row,.charts-row-alt{gap:12px}
+  .trio-grid{grid-template-columns:1fr;gap:10px}
+  .health-score-card{flex-direction:column;gap:16px;text-align:center;padding:20px}
+  .obs-card{flex-direction:column;gap:10px}
+}
+
+@media(max-width:400px){
+  .topbar{height:50px;padding:0 12px}
+  .page-scroll{padding:10px 8px 32px}
+  .btn-ghost{padding:6px 10px;font-size:11px}
+  .btn-primary{padding:7px 12px;font-size:12px}
+}
+
+/* ══════════════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════════════ */
+@media print{
+  .sidebar,.topbar,.toast-wrap,.kbd-hint,.hamburger,.mobile-overlay,
+  .bg-mesh,.grid-overlay,.orb{display:none !important}
+  .app-shell{display:block}
+  .main-area{display:block}
+  .page-scroll{overflow:visible;padding:20px}
+  body{background:#fff;color:#000}
+  .card,.metric-card{box-shadow:none;border:1px solid #ddd}
 }
 
 /* ══════════════════════════════════════════════════

@@ -3,7 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="FinTrack Pro — Smart personal finance dashboard with budget tracking and insights" />
+    <meta name="description" content="FinTrack Pro — Smart personal finance dashboard with budget tracking, spending insights, and financial health scoring. Built with React." />
+    <meta name="theme-color" content="#05080f" />
+    <meta name="color-scheme" content="dark light" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="FinTrack Pro — Finance Dashboard" />
+    <meta property="og:description" content="A premium personal finance dashboard with budget tracking, real-time insights, and financial health scoring." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://fintrack-pro-v3.vercel.app" />
+
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2304070e'/%3E%3Cpath d='M6 22l6-8 5 5 4-9 5 5' stroke='url(%23g)' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='6' y1='10' x2='26' y2='20'%3E%3Cstop stop-color='%2300f0c8'/%3E%3Cstop offset='1' stop-color='%234d9fff'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E" />
     <title>FinTrack Pro — Finance Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,10 +21,21 @@
     <style>
       html, body { margin: 0; padding: 0; background: #05080f; }
       #root { height: 100dvh; }
+      .skip-link{position:absolute;top:-40px;left:8px;padding:8px 16px;background:#00f0c8;color:#000;font-weight:700;z-index:100;border-radius:0 0 8px 8px;transition:top .2s}
+      .skip-link:focus{top:0}
     </style>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div id="root"></div>
+    <noscript>
+      <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#05080f;color:#edf2ff;font-family:Inter,sans-serif;text-align:center;padding:20px">
+        <div>
+          <h1 style="font-size:24px;margin-bottom:12px">FinTrack Pro</h1>
+          <p style="color:#7a8da8">This application requires JavaScript to run. Please enable JavaScript in your browser settings.</p>
+        </div>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
