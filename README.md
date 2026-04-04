@@ -81,6 +81,20 @@ The dashboard ships with **5 full pages**, a comprehensive design system, dark/l
 
 ---
 
+## Engineering Decisions
+
+| Decision | Rationale |
+|---|---|
+| **Centralized `useReducer` + Context** | A single `AppContext` with `useReducer` maintains strict unidirectional data flow. Role changes (Admin ↔ Viewer) propagate instantly across all 5 modules without state synchronization bugs. All derived data is computed via `useMemo` in `useFinanceCalc`, ensuring O(n) recalculation only when the transaction array changes. |
+| **CSS Custom Properties over CSS-in-JS** | A single design system file (`index.css`) with 40+ CSS variables enables instant theme switching (dark/light) via a single class toggle on `<html>`. No runtime JS overhead, no FOUC, and full server-side rendering compatibility. |
+| **`localStorage` persistence** | Transactions, budgets, goals, and theme preference persist across sessions using `localStorage` with `useEffect` sync. This mirrors real-world SPA behavior without introducing backend complexity. |
+| **Conditional rendering for RBAC** | Admin-only UI (Add/Edit/Delete buttons, modals) is completely removed from the DOM via `{isAdmin && ...}` — not merely disabled. This prevents DOM inspection bypasses and follows React best practices for role-based UIs. |
+| **`useMemo` for expensive calculations** | The Financial Health Score algorithm, category spending breakdown, budget usage percentages, and chart data are all wrapped in `useMemo` with precise dependency arrays. This prevents unnecessary re-computation when unrelated state changes (e.g., search input typing). |
+| **Counter animation cache** | KPI counter animations run from 0 only on initial load. A module-level cache ensures returning to the Overview page shows numbers instantly — no annoying "slot machine" effect on every navigation. Re-animates only when the underlying data changes. |
+| **Vitest over Jest** | Vitest integrates natively with Vite's module resolution and HMR, eliminating the need for separate Babel/webpack configuration. Tests run in ~150ms. |
+
+---
+
 ## Project Structure
 
 ```

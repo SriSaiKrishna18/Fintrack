@@ -15,6 +15,13 @@ export default function AddTransactionModal({ onClose, editTx }) {
   const [cat,    setCat]    = useState(editTx?.cat || (type === 'income' ? 'Salary' : 'Food'));
   const [date,   setDate]   = useState(editTx?.date || new Date().toISOString().split('T')[0]);
   const [err,    setErr]    = useState('');
+  const [shaking, setShaking] = useState(false);
+
+  const triggerErr = (msg) => {
+    setErr(msg);
+    setShaking(true);
+    setTimeout(() => setShaking(false), 400);
+  };
 
   const availCats = type === 'income' ? incomes : Object.keys(CATEGORIES).filter(c => !incomes.includes(c));
 
@@ -24,12 +31,12 @@ export default function AddTransactionModal({ onClose, editTx }) {
   };
 
   const submit = () => {
-    if (!name.trim())          return setErr('Please enter a description.');
+    if (!name.trim())          return triggerErr('Please enter a description.');
     const amt = parseFloat(amount);
-    if (isNaN(amt) || amt <= 0) return setErr('Please enter a valid amount > 0.');
-    if (!date)                 return setErr('Please select a date.');
+    if (isNaN(amt) || amt <= 0) return triggerErr('Please enter a valid amount > 0.');
+    if (!date)                 return triggerErr('Please select a date.');
 
-    const tx = { id: editTx?.id || Date.now(), name: name.trim(), amount: amt, cat, type, date };
+    const tx = { id: editTx?.id || Date.now(), name: name.trim().slice(0, 80), amount: amt, cat, type, date };
     if (isEdit) {
       dispatch({ type: 'EDIT_TX', payload: tx });
       toast?.('Transaction updated!', 'success');
@@ -44,7 +51,7 @@ export default function AddTransactionModal({ onClose, editTx }) {
 
   return (
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal">
+      <div className={`modal${shaking ? ' shake' : ''}`}>
         {/* Top stripe */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: 'var(--r-2xl) var(--r-2xl) 0 0', background: type === 'income' ? 'var(--grad-accent)' : 'linear-gradient(90deg,var(--red),#ff9060)' }} />
 

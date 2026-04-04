@@ -144,17 +144,25 @@ select,input{font-family:inherit}
 /* ══════════════════════════════════════════════════
    SCROLLBAR
 ══════════════════════════════════════════════════ */
-::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--b-md);border-radius:99px}
+::-webkit-scrollbar-thumb{background:var(--b-md);border-radius:99px;border:1px solid transparent;background-clip:content-box}
 ::-webkit-scrollbar-thumb:hover{background:var(--b-lg)}
+::-webkit-scrollbar-corner{background:transparent}
+/* Firefox */
+*{scrollbar-width:thin;scrollbar-color:var(--b-md) transparent}
 
 /* ══════════════════════════════════════════════════
    UTILITIES
 ══════════════════════════════════════════════════ */
-.mono{font-family:'JetBrains Mono','SF Mono',monospace}
+.mono{font-family:'JetBrains Mono','SF Mono',monospace;font-variant-numeric:tabular-nums}
 .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lbl{font-size:10.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--t3)}
+
+/* Custom focus states — accent-colored instead of default Chrome blue */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--r-sm)}
+.btn-primary:focus-visible,.btn-ghost:focus-visible,.btn-icon:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.input:focus-visible{outline:none} /* inputs use border-color instead */
 
 /* ══════════════════════════════════════════════════
    BACKGROUND FX — enhanced with animated particles
@@ -641,6 +649,8 @@ select.input{
    PAGE ANIMATIONS
 ══════════════════════════════════════════════════ */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .4s ease}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
 @keyframes numIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
