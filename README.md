@@ -3,9 +3,20 @@
 > A premium personal finance dashboard built for the **Zorvyn FinTech Frontend Developer Intern** assignment.  
 > Designed to demonstrate senior-level frontend architecture, pixel-perfect UI, and thoughtful UX decision-making.
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-000?style=flat&logo=vercel&logoColor=white)](https://fintrack-pro-v3.vercel.app)
+[![GitHub](https://img.shields.io/badge/Repo-GitHub-181717?style=flat&logo=github)](https://github.com/SriSaiKrishna18/Fintrack)
 [![React](https://img.shields.io/badge/React-18.2-61dafb?style=flat&logo=react)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-5.0-646cff?style=flat&logo=vite)](https://vitejs.dev)
 [![Recharts](https://img.shields.io/badge/Recharts-2.10-8884d8?style=flat)](https://recharts.org)
+
+---
+
+## 🔗 Links
+
+| Resource | URL |
+|---|---|
+| **Live Demo** | [https://fintrack-pro-v3.vercel.app](https://fintrack-pro-v3.vercel.app) |
+| **GitHub Repo** | [https://github.com/SriSaiKrishna18/Fintrack](https://github.com/SriSaiKrishna18/Fintrack) |
 
 ---
 
@@ -57,6 +68,10 @@ The dashboard ships with **5 full pages**, a comprehensive design system, dark/l
 | **Pagination** | Transactions table paginates at 15 rows per page with smart ellipsis navigation. |
 | **Date Range Filter** | Global filter (All Time / This Month / Last Month / Last 3 Months) affects all charts and metrics. |
 | **Toast System** | Animated toast notifications for every user action (add/edit/delete/export). 4 types: success/error/info/warning. |
+| **Keyboard Shortcuts** | Press `?` to view all shortcuts. `1-5` for page navigation, `T` for theme, `N` for new transaction. |
+| **Welcome Banner** | First-time user onboarding banner with feature highlights. Dismissible, persisted via localStorage. |
+| **Reset Demo Data** | One-click restore of original 40 transactions from the Transactions page for easy evaluation. |
+| **SVG Favicon** | Custom inline SVG favicon matching the brand identity — no external file required. |
 
 ---
 
@@ -158,3 +173,5 @@ The segmented role switcher (visible in both Topbar and Sidebar) changes:
 ---
 
 *Built by **Sri Sai Krishna** · Zorvyn FinTech Frontend Developer Intern Assignment · April 2026*
+
+**🔗 [Live Demo](https://fintrack-pro-v3.vercel.app) · [GitHub](https://github.com/SriSaiKrishna18/Fintrack)**
