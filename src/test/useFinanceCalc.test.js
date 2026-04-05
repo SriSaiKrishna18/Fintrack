@@ -165,20 +165,76 @@ describe('useFinanceCalc', () => {
     });
   });
 
-  describe('fullChartData', () => {
-    it('returns 8 data points (7 historical + 1 current)', () => {
+  describe('recurringStats', () => {
+    it('returns recurring vs one-time expense totals', () => {
       const { result } = renderFinanceHook();
-      expect(result.current.fullChartData.length).toBe(8);
+      const { recurringTotal, oneTimeTotal, recurringCount, oneTimeCount } = result.current.recurringStats;
+      expect(typeof recurringTotal).toBe('number');
+      expect(typeof oneTimeTotal).toBe('number');
+      expect(recurringCount + oneTimeCount).toBeGreaterThan(0);
     });
 
-    it('each data point has month, income, expense, savings', () => {
+    it('recurring + one-time equals total expenses', () => {
       const { result } = renderFinanceHook();
-      result.current.fullChartData.forEach(d => {
-        expect(d).toHaveProperty('month');
-        expect(d).toHaveProperty('income');
-        expect(d).toHaveProperty('expense');
-        expect(d).toHaveProperty('savings');
+      const { recurringTotal, oneTimeTotal } = result.current.recurringStats;
+      expect(recurringTotal + oneTimeTotal).toBe(result.current.totals.expense);
+    });
+  });
+
+  describe('recurringItems', () => {
+    it('returns at most 5 top recurring expenses sorted by amount', () => {
+      const { result } = renderFinanceHook();
+      expect(result.current.recurringItems.length).toBeLessThanOrEqual(5);
+      result.current.recurringItems.forEach(tx => {
+        expect(tx.recurring).toBe(true);
+        expect(tx.type).toBe('expense');
       });
+    });
+  });
+
+  describe('dowPattern', () => {
+    it('returns 7 day-of-week entries with avg and total', () => {
+      const { result } = renderFinanceHook();
+      expect(result.current.dowPattern.length).toBe(7);
+      result.current.dowPattern.forEach(d => {
+        expect(d).toHaveProperty('day');
+        expect(d).toHaveProperty('avg');
+        expect(d).toHaveProperty('total');
+      });
+    });
+  });
+
+  describe('biggestExpense', () => {
+    it('returns the single largest expense transaction', () => {
+      const { result } = renderFinanceHook();
+      const biggest = result.current.biggestExpense;
+      expect(biggest).not.toBeNull();
+      expect(biggest.type).toBe('expense');
+      // Verify it's actually the biggest
+      const allExpenses = result.current.filteredTxs.filter(t => t.type === 'expense');
+      allExpenses.forEach(t => {
+        expect(biggest.amount).toBeGreaterThanOrEqual(t.amount);
+      });
+    });
+  });
+
+  describe('50/30/20 rule', () => {
+    it('needs50, wants30, savings20 all return actual, ideal, pct', () => {
+      const { result } = renderFinanceHook();
+      ['needs50', 'wants30', 'savings20'].forEach(key => {
+        const val = result.current[key];
+        expect(val).toHaveProperty('actual');
+        expect(val).toHaveProperty('ideal');
+        expect(val).toHaveProperty('pct');
+        expect(typeof val.pct).toBe('number');
+      });
+    });
+
+    it('ideal values sum to total income', () => {
+      const { result } = renderFinanceHook();
+      const { needs50, wants30, savings20 } = result.current;
+      const idealSum = needs50.ideal + wants30.ideal + savings20.ideal;
+      expect(idealSum).toBeCloseTo(result.current.totals.income, 0);
     });
   });
 });

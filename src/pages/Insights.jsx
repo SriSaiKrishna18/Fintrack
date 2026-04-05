@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useApp } from '../context/AppContext';
 import { useFinanceCalc } from '../hooks/useFinanceCalc';
 import { CATEGORIES, MONTHLY_HISTORY } from '../data/mockData';
 import {
@@ -86,11 +85,130 @@ function buildObs(totals, savingsRate, top, second, expDiff) {
   return obs;
 }
 
+// ── Day-of-week spending heatmap bar ──
+function DOWChart({ data }) {
+  const max = Math.max(...data.map(d => d.avg), 1);
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const todayDow = new Date().getDay();
+
+  return (
+    <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: 80, padding: '0 4px' }}>
+      {data.map((d, i) => {
+        const h = Math.max((d.avg / max) * 100, 4);
+        const isToday = days[i] === days[todayDow];
+        const isWeekend = i === 0 || i === 6;
+        const barColor = isToday ? 'var(--accent)' : isWeekend ? 'var(--amber)' : 'var(--blue)';
+        return (
+          <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <div
+              title={`${d.day}: avg ${fmt(d.avg)}`}
+              style={{
+                width: '100%', height: `${h}%`, borderRadius: '4px 4px 0 0',
+                background: barColor,
+                opacity: isToday ? 1 : 0.55,
+                transition: 'opacity 0.2s',
+                cursor: 'default',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '1'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = isToday ? '1' : '0.55'; }}
+            />
+            <span style={{ fontSize: 9.5, color: isToday ? 'var(--accent)' : 'var(--t3)', fontWeight: isToday ? 700 : 500, fontFamily: 'var(--font-mono, monospace)' }}>{d.day}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Recurring vs One-time doughnut ──
+function RecurringRing({ recurring, oneTime }) {
+  const total = recurring + oneTime || 1;
+  const rPct  = Math.round(recurring / total * 100);
+  const r = 32, circ = 2 * Math.PI * r;
+  const rDash = circ * (rPct / 100);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        <svg width={80} height={80} viewBox="0 0 80 80">
+          <circle cx={40} cy={40} r={r} fill="none" stroke="var(--bg-elevated)" strokeWidth={8}/>
+          <circle cx={40} cy={40} r={r} fill="none" stroke="var(--accent)" strokeWidth={8}
+            strokeLinecap="round"
+            strokeDasharray={`${rDash} ${circ}`}
+            transform="rotate(-90 40 40)"
+            style={{ transition: 'stroke-dasharray 1s ease' }}
+          />
+          <circle cx={40} cy={40} r={r} fill="none" stroke="var(--amber)" strokeWidth={8}
+            strokeLinecap="round"
+            strokeDasharray={`${circ * ((100-rPct)/100)} ${circ}`}
+            strokeDashoffset={-rDash}
+            transform="rotate(-90 40 40)"
+            style={{ transition: 'all 1s ease' }}
+          />
+        </svg>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--t1)' }}>{rPct}%</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--accent)', flexShrink: 0 }}/>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--t1)' }}>Recurring</div>
+            <div className="mono" style={{ fontSize: 11, color: 'var(--t3)' }}>{fmt(recurring)}</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--amber)', flexShrink: 0 }}/>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--t1)' }}>One-time</div>
+            <div className="mono" style={{ fontSize: 11, color: 'var(--t3)' }}>{fmt(oneTime)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 50/30/20 actual vs ideal visual ──
+function RuleBar({ label, actual, ideal, color, pct }) {
+  const overIdeal = actual > ideal;
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+        <div>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--t1)' }}>{label}</span>
+          <span style={{ fontSize: 11, color: 'var(--t3)', marginLeft: 6 }}>actual: {fmt(actual)}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="mono" style={{ fontSize: 11, color: overIdeal ? 'var(--red)' : 'var(--green)', fontWeight: 700 }}>{pct}%</span>
+          {overIdeal && <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 99, background: 'var(--red-bg)', color: 'var(--red)' }}>over</span>}
+          {!overIdeal && <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 99, background: 'var(--green-bg)', color: 'var(--green)' }}>ok</span>}
+        </div>
+      </div>
+      {/* Two-layer track: ideal zone + actual fill */}
+      <div style={{ position: 'relative', height: 8, background: 'var(--bg-elevated)', borderRadius: 99, overflow: 'hidden' }}>
+        {/* ideal marker */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: 99, background: color + '14' }} />
+        <div style={{
+          position: 'absolute', top: 0, left: 0, height: '100%', borderRadius: 99,
+          background: overIdeal ? 'var(--red)' : color,
+          width: `${Math.min(pct, 100)}%`,
+          transition: 'width 0.8s cubic-bezier(.4,0,.2,1)',
+          boxShadow: `0 0 8px ${overIdeal ? 'var(--red-glow)' : color + '50'}`,
+        }}/>
+      </div>
+      <div style={{ fontSize: 10, color: 'var(--t4)', marginTop: 4 }}>Target: {fmt(ideal)} (ideal)</div>
+    </div>
+  );
+}
+
 export default function Insights() {
-  const { state } = useApp();
-  const isLight = state.theme === 'light';
-  const { totals, savingsRate, categorySpend, fullChartData } = useFinanceCalc();
-  const [activeMonth, setActiveMonth] = useState(null);
+  const {
+    totals, savingsRate, categorySpend, fullChartData,
+    recurringStats, recurringItems, weeklySpend, dowPattern,
+    biggestExpense, needs50, wants30, savings20,
+  } = useFinanceCalc();
 
   const top    = categorySpend[0] || ['—', 0];
   const second = categorySpend[1] || ['—', 0];
@@ -115,10 +233,7 @@ export default function Insights() {
 
   const observations = buildObs(totals, savingsRate, top, second, expDiff);
 
-  // 50/30/20 breakdown
-  const needs  = totals.income * 0.5;
-  const wants  = totals.income * 0.3;
-  const saves  = totals.income * 0.2;
+  const peakDow = dowPattern.reduce((a, b) => b.avg > a.avg ? b : a, dowPattern[0] || { day: '—', avg: 0 });
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -153,47 +268,120 @@ export default function Insights() {
           sub={`Across ${categorySpend.length} active categories`}
           delay={4}
         />
-        <InsightCard label="Net Balance" value={fmt(totals.balance)} icon="🏦"
-          color={totals.balance >= 0 ? 'var(--green)' : 'var(--red)'}
-          sub={totals.balance >= 0 ? 'Surplus this period' : 'Deficit this period'}
-          progress={totals.income > 0 ? Math.min(Math.abs(Math.round(totals.balance / totals.income * 100)), 100) : 0}
+        <InsightCard label="Peak Spending Day" value={peakDow.day} icon="📅"
+          color="var(--amber)"
+          sub={`Avg ${fmt(peakDow.avg)} per ${peakDow.day} transaction`}
           delay={5}
         />
       </div>
 
-      {/* ── 50/30/20 Rule Card ── */}
-      <div className="card card-p anim-up d-6">
+      {/* ── NEW: 50/30/20 Actual vs Ideal ── */}
+      <div className="card card-p anim-up d-5">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>50/30/20 Budget Rule</div>
-            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 3 }}>Ideal allocation based on your income</div>
+            <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>50/30/20 Rule — Actual vs Ideal</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 3 }}>How your real spending compares to the recommended split</div>
           </div>
           <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 99, background: 'var(--accent-bg)', color: 'var(--accent)', border: '1px solid rgba(0,240,200,0.2)' }}>
             Income: {fmt(totals.income)}
           </span>
         </div>
-        <div className="trio-grid">
-          {[
-            { label: '50% Needs', budget: needs,  color: 'var(--blue)',   desc: 'Rent, utilities, groceries', icon: '🏠' },
-            { label: '30% Wants', budget: wants,  color: 'var(--purple)', desc: 'Dining, entertainment, travel', icon: '🎯' },
-            { label: '20% Savings', budget: saves, color: 'var(--green)',  desc: 'Investments, emergency fund', icon: '💰' },
-          ].map(({ label, budget, color, desc, icon }) => (
-            <div key={label} style={{ background: 'var(--bg-card-alt)', border: '1px solid var(--b-sm)', borderRadius: 'var(--r-lg)', padding: '18px', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: color, opacity: 0.5 }} />
-              <div style={{ fontSize: 22, marginBottom: 10 }}>{icon}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.7px', marginBottom: 6 }}>{label}</div>
-              <div className="mono" style={{ fontSize: 20, fontWeight: 700, color, letterSpacing: '-0.8px', marginBottom: 6 }}>{fmt(budget)}</div>
-              <div style={{ fontSize: 11, color: 'var(--t3)', lineHeight: 1.5 }}>{desc}</div>
-            </div>
-          ))}
+        <RuleBar label="50% Needs" actual={needs50.actual} ideal={needs50.ideal} color="var(--blue)" pct={needs50.pct} />
+        <RuleBar label="30% Wants" actual={wants30.actual} ideal={wants30.ideal} color="var(--purple)" pct={wants30.pct} />
+        <RuleBar label="20% Savings" actual={Math.max(savings20.actual, 0)} ideal={savings20.ideal} color="var(--green)" pct={Math.max(savings20.pct, 0)} />
+        <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--bg-card-alt)', border: '1px solid var(--b-sm)', fontSize: 11.5, color: 'var(--t3)', lineHeight: 1.7 }}>
+          💡 <strong style={{ color: 'var(--t2)' }}>Needs</strong> include rent, bills, groceries, transport, health & insurance.&nbsp;
+          <strong style={{ color: 'var(--t2)' }}>Wants</strong> cover food, dining, entertainment, shopping, travel & education.
         </div>
       </div>
 
-      {/* ── Charts Row ── */}
-      <div className="charts-row-alt">
+      {/* ── NEW: Recurring vs One-time + Weekly Spend ── */}
+      <div className="charts-row">
+        {/* Recurring breakdown */}
+        <div className="card card-p anim-up d-6">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>Recurring vs One-time</div>
+              <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 3 }}>Auto-debits & subscriptions vs individual spends</div>
+            </div>
+          </div>
+          <RecurringRing recurring={recurringStats.recurringTotal} oneTime={recurringStats.oneTimeTotal} />
+          <div style={{ marginTop: 18, borderTop: '1px solid var(--b-xs)', paddingTop: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 10 }}>Top Recurring</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {recurringItems.map(tx => {
+                const { icon, color } = CATEGORIES[tx.cat] || {};
+                return (
+                  <div key={tx.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 7, background: (color || '#888') + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0 }}>{icon}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--t1)' }} className="truncate">{tx.name}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--t3)' }}>{tx.cat}</div>
+                    </div>
+                    <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--t2)', flexShrink: 0 }}>{fmt(tx.amount)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
-        {/* Monthly bar comparison */}
+        {/* Weekly spend trend */}
         <div className="card card-p anim-up d-7">
+          <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px', marginBottom: 4 }}>Weekly Spend Trend</div>
+          <div style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 18 }}>Rolling 8-week expense total</div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={weeklySpend} barCategoryGap="30%" margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
+              <XAxis dataKey="week" tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 9.5 }} axisLine={false} tickLine={false} />
+              <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)' }} />
+              <Bar dataKey="amount" name="Spent" radius={[5, 5, 0, 0]}>
+                {weeklySpend.map((_, i) => (
+                  <Cell key={i} fill="var(--blue)" fillOpacity={0.55 + (i / weeklySpend.length) * 0.4} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ── NEW: Day-of-week pattern ── */}
+      <div className="card card-p anim-up" style={{ animationDelay: '0.38s' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>When Do You Spend Most?</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 3 }}>Average spend per transaction by day of week</div>
+          </div>
+          <div style={{ display: 'flex', gap: 12, fontSize: 10.5, color: 'var(--t3)', alignItems: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--accent)', display: 'inline-block' }}/> Today</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--amber)', display: 'inline-block' }}/> Weekend</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--blue)', display: 'inline-block' }}/> Weekday</span>
+          </div>
+        </div>
+        <DOWChart data={dowPattern} />
+        <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          <div style={{ padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--bg-card-alt)', border: '1px solid var(--b-sm)', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 4 }}>Highest day</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--amber)' }}>{peakDow.day}</div>
+            <div className="mono" style={{ fontSize: 11, color: 'var(--t3)' }}>{fmt(peakDow.avg)} avg</div>
+          </div>
+          <div style={{ padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--bg-card-alt)', border: '1px solid var(--b-sm)', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 4 }}>Recurring/month</div>
+            <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)' }}>{fmt(recurringStats.recurringTotal)}</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)' }}>{recurringStats.recurringCount} auto-debits</div>
+          </div>
+          <div style={{ padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--bg-card-alt)', border: '1px solid var(--b-sm)', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 4 }}>One-time spends</div>
+            <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--blue)' }}>{fmt(recurringStats.oneTimeTotal)}</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)' }}>{recurringStats.oneTimeCount} transactions</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Monthly comparison chart ── */}
+      <div className="charts-row-alt">
+        <div className="card card-p anim-up" style={{ animationDelay: '0.44s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>Monthly Comparison</div>
@@ -213,8 +401,8 @@ export default function Insights() {
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyData} barCategoryGap="28%" barGap={4} margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 11, fontFamily: isLight ? 'DM Sans' : 'Inter' }} axisLine={false} tickLine={false} dy={5} />
-              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: isLight ? 'DM Mono' : 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 11, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)', radius: 6 }} />
               <Bar dataKey="income"  fill="var(--income)"  fillOpacity={0.75} radius={[6, 6, 0, 0]} name="Income" />
               <Bar dataKey="expense" fill="var(--expense)" fillOpacity={0.65} radius={[6, 6, 0, 0]} name="Expense" />
@@ -223,7 +411,7 @@ export default function Insights() {
         </div>
 
         {/* Category horizontal bars */}
-        <div className="card card-p anim-up" style={{ animationDelay: '0.42s' }}>
+        <div className="card card-p anim-up" style={{ animationDelay: '0.48s' }}>
           <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px', marginBottom: 4 }}>Category Spend Rank</div>
           <div style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 18 }}>All expense categories</div>
           {catBarData.length === 0 ? (
@@ -232,8 +420,8 @@ export default function Insights() {
             <ResponsiveContainer width="100%" height={Math.max(220, catBarData.length * 34)}>
               <BarChart data={catBarData} layout="vertical" barCategoryGap="22%" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" horizontal={false} />
-                <XAxis type="number" tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 9.5, fontFamily: isLight ? 'DM Mono' : 'JetBrains Mono' }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: isLight ? 'DM Sans' : 'Inter' }} axisLine={false} tickLine={false} width={90} />
+                <XAxis type="number" tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 9.5, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+                <YAxis dataKey="name" type="category" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} width={90} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)' }} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} name="Spent">
                   {catBarData.map((entry, i) => (
@@ -247,7 +435,7 @@ export default function Insights() {
       </div>
 
       {/* ── Savings Rate Trend ── */}
-      <div className="card card-p anim-up" style={{ animationDelay: '0.48s' }}>
+      <div className="card card-p anim-up" style={{ animationDelay: '0.52s' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>Savings Rate Trend</div>
@@ -271,8 +459,8 @@ export default function Insights() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-            <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 10.5, fontFamily: isLight ? 'DM Sans' : 'Inter' }} axisLine={false} tickLine={false} dy={6} />
-            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: isLight ? 'DM Mono' : 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 10.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={6} />
+            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
             <Tooltip content={<ChartTip />} />
             <ReferenceLine y={30} stroke="var(--green)" strokeDasharray="6 3" strokeOpacity={0.5}
               label={{ value: '30% target', position: 'insideTopRight', fill: 'var(--green)', fontSize: 10, fontFamily: 'Inter', fontWeight: 600 }}
@@ -284,12 +472,12 @@ export default function Insights() {
       </div>
 
       {/* ── Key Observations ── */}
-      <div className="card card-p anim-up" style={{ animationDelay: '0.52s' }}>
+      <div className="card card-p anim-up" style={{ animationDelay: '0.56s' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
           <div style={{ width: 40, height: 40, borderRadius: 'var(--r-md)', background: 'linear-gradient(135deg,rgba(0,240,200,0.12),rgba(77,159,255,0.10))', border: '1px solid rgba(0,240,200,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>💡</div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>AI-Derived Observations</div>
-            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>Personalized insights from your spending data</div>
+            <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px' }}>Smart Observations</div>
+            <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>Derived from your spending patterns this period</div>
           </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 10 }}>

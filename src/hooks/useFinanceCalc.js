@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { MONTHLY_HISTORY } from '../data/mockData';
+import { MONTHLY_HISTORY, DOW_PATTERN } from '../data/mockData';
 
 function getDateRange(key) {
   const now = new Date();
@@ -47,9 +47,15 @@ export function useFinanceCalc() {
     let txs = [...baseTxs];
     if (state.filter !== 'all')    txs = txs.filter(t => t.type === state.filter);
     if (state.catFilter !== 'all') txs = txs.filter(t => t.cat === state.catFilter);
+    if (state.recurringFilter === 'recurring')   txs = txs.filter(t => t.recurring);
+    if (state.recurringFilter === 'one-time')    txs = txs.filter(t => !t.recurring);
     if (state.search.trim()) {
       const q = state.search.toLowerCase();
-      txs = txs.filter(t => t.name.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q));
+      txs = txs.filter(t =>
+        t.name.toLowerCase().includes(q) ||
+        t.cat.toLowerCase().includes(q) ||
+        (t.note || '').toLowerCase().includes(q)
+      );
     }
     txs.sort((a, b) => {
       if (state.sortBy === 'date')   return state.sortDir * (new Date(b.date) - new Date(a.date));
@@ -58,7 +64,7 @@ export function useFinanceCalc() {
       return 0;
     });
     return txs;
-  }, [baseTxs, state.filter, state.catFilter, state.search, state.sortBy, state.sortDir]);
+  }, [baseTxs, state.filter, state.catFilter, state.recurringFilter, state.search, state.sortBy, state.sortDir]);
 
   const monthlyBreakdown = useMemo(() => {
     const map = {};
@@ -84,22 +90,18 @@ export function useFinanceCalc() {
   // Financial Health Score (0-100)
   const healthScore = useMemo(() => {
     let score = 0;
-    // Savings rate (max 35 pts)
-    if (savingsRate >= 30)     score += 35;
+    if (savingsRate >= 30)      score += 35;
     else if (savingsRate >= 20) score += 25;
     else if (savingsRate >= 10) score += 15;
     else if (savingsRate >= 0)  score += 5;
-    // Budget adherence (max 25 pts)
     const overCount = budgetUsage.filter(b => b.over && b.budget > 0).length;
     const tracked   = budgetUsage.filter(b => b.budget > 0).length;
     if (tracked > 0) score += Math.round(25 * (1 - overCount / tracked));
     else score += 12;
-    // Income diversity (max 20 pts)
     const incomeTypes = new Set(baseTxs.filter(t => t.type === 'income').map(t => t.cat));
     if (incomeTypes.size >= 3) score += 20;
     else if (incomeTypes.size === 2) score += 14;
     else score += 7;
-    // Investment habit (max 20 pts)
     const invSpend = categorySpend.find(([c]) => c === 'Investment')?.[1] || 0;
     const invRate  = totals.income > 0 ? invSpend / totals.income : 0;
     if (invRate >= 0.15) score += 20;
@@ -118,18 +120,123 @@ export function useFinanceCalc() {
     return Math.round(totals.balance - (avgDailyExpense * remainingDays));
   }, [totals]);
 
-  // Recent 7-month complete chart data
+  // Full 8-month chart data
   const fullChartData = useMemo(() => {
-    const last = MONTHLY_HISTORY[MONTHLY_HISTORY.length - 1];
     return [
       ...MONTHLY_HISTORY,
       { month: 'Apr', income: totals.income, expense: totals.expense, savings: totals.balance },
     ];
   }, [totals]);
 
+  // ── NEW: Recurring vs One-time breakdown ──
+  const recurringStats = useMemo(() => {
+    const exp = baseTxs.filter(t => t.type === 'expense');
+    const recurringTotal  = exp.filter(t => t.recurring).reduce((a, t) => a + t.amount, 0);
+    const oneTimeTotal    = exp.filter(t => !t.recurring).reduce((a, t) => a + t.amount, 0);
+    const recurringCount  = exp.filter(t => t.recurring).length;
+    const oneTimeCount    = exp.filter(t => !t.recurring).length;
+    return { recurringTotal, oneTimeTotal, recurringCount, oneTimeCount };
+  }, [baseTxs]);
+
+  // ── NEW: Top recurring subscriptions/bills ──
+  const recurringItems = useMemo(() => {
+    return baseTxs
+      .filter(t => t.type === 'expense' && t.recurring)
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5);
+  }, [baseTxs]);
+
+  // ── NEW: Weekly spending (last 8 weeks derived from real txs) ──
+  const weeklySpend = useMemo(() => {
+    const buckets = {};
+    state.transactions
+      .filter(t => t.type === 'expense')
+      .forEach(t => {
+        const d = new Date(t.date);
+        // ISO week number
+        const jan1 = new Date(d.getFullYear(), 0, 1);
+        const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+        const key  = `${d.getFullYear()}-W${String(week).padStart(2,'0')}`;
+        const lbl  = `W${week}`;
+        if (!buckets[key]) buckets[key] = { week: lbl, amount: 0, key };
+        buckets[key].amount += t.amount;
+      });
+    return Object.values(buckets).sort((a, b) => a.key.localeCompare(b.key)).slice(-8);
+  }, [state.transactions]);
+
+  // ── NEW: Day-of-week spending pattern from actual transactions ──
+  const dowPattern = useMemo(() => {
+    const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const sums   = [0,0,0,0,0,0,0];
+    const counts = [0,0,0,0,0,0,0];
+    baseTxs.filter(t => t.type === 'expense').forEach(t => {
+      const dow = new Date(t.date).getDay();
+      sums[dow]   += t.amount;
+      counts[dow] += 1;
+    });
+    return labels.map((day, i) => ({
+      day,
+      avg:   counts[i] > 0 ? Math.round(sums[i] / counts[i]) : 0,
+      total: sums[i],
+    }));
+  }, [baseTxs]);
+
+  // ── NEW: Biggest single expense this period ──
+  const biggestExpense = useMemo(() => {
+    const exp = baseTxs.filter(t => t.type === 'expense');
+    return exp.length ? exp.reduce((a, b) => b.amount > a.amount ? b : a, exp[0]) : null;
+  }, [baseTxs]);
+
+  // ── NEW: Streak — consecutive days with expense logged ──
+  const currentStreak = useMemo(() => {
+    const dates = new Set(
+      state.transactions
+        .filter(t => t.type === 'expense')
+        .map(t => t.date)
+    );
+    let streak = 0;
+    const d = new Date();
+    while (true) {
+      const key = d.toISOString().split('T')[0];
+      if (dates.has(key)) { streak++; d.setDate(d.getDate() - 1); }
+      else break;
+    }
+    return streak;
+  }, [state.transactions]);
+
+  // ── NEW: Needs / Wants / Savings (50-30-20 actual vs ideal) ──
+  const needs50 = useMemo(() => {
+    const needsCats = new Set(['Rent','Bills','Groceries','Transport','Health','Insurance']);
+    const actual = baseTxs
+      .filter(t => t.type === 'expense' && needsCats.has(t.cat))
+      .reduce((a, t) => a + t.amount, 0);
+    const ideal = totals.income * 0.5;
+    return { actual, ideal, pct: totals.income > 0 ? Math.round(actual / totals.income * 100) : 0 };
+  }, [baseTxs, totals]);
+
+  const wants30 = useMemo(() => {
+    const wantsCats = new Set(['Food','Dining','Entertainment','Shopping','Travel','Education']);
+    const actual = baseTxs
+      .filter(t => t.type === 'expense' && wantsCats.has(t.cat))
+      .reduce((a, t) => a + t.amount, 0);
+    const ideal = totals.income * 0.3;
+    return { actual, ideal, pct: totals.income > 0 ? Math.round(actual / totals.income * 100) : 0 };
+  }, [baseTxs, totals]);
+
+  const savings20 = useMemo(() => {
+    const actual = totals.balance;
+    const ideal  = totals.income * 0.2;
+    return { actual, ideal, pct: savingsRate };
+  }, [totals, savingsRate]);
+
   return {
     totals, savingsRate, categorySpend, filteredTxs,
     monthlyBreakdown, budgetUsage, baseTxs,
     healthScore, projected, fullChartData,
+    // new
+    recurringStats, recurringItems,
+    weeklySpend, dowPattern,
+    biggestExpense, currentStreak,
+    needs50, wants30, savings20,
   };
 }

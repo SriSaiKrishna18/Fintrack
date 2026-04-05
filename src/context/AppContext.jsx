@@ -3,7 +3,7 @@ import { INITIAL_TRANSACTIONS } from '../data/mockData';
 
 const AppContext = createContext(null);
 
-const savedTheme   = localStorage.getItem('ft_theme')   || 'light';
+const savedTheme   = localStorage.getItem('ft_theme')   || 'dark';
 const savedTxs     = JSON.parse(localStorage.getItem('ft_txs')     || 'null');
 const savedBudgets = JSON.parse(localStorage.getItem('ft_budgets') || 'null');
 const savedGoals   = JSON.parse(localStorage.getItem('ft_goals')   || 'null');
@@ -16,40 +16,42 @@ const DEFAULT_BUDGETS = {
 };
 
 const DEFAULT_GOALS = [
-  { id: 1, name: 'Emergency Fund', target: 300000, current: 125000, icon: '🛡️', color: '#2d8a6e' },
-  { id: 2, name: 'Vacation — Europe', target: 150000, current: 42000, icon: '✈️', color: '#4a6080' },
-  { id: 3, name: 'MacBook Pro', target: 180000, current: 60000, icon: '💻', color: '#6e5a9a' },
+  { id: 1, name: 'Emergency Fund', target: 300000, current: 125000, icon: '🛡️', color: '#00f0c8' },
+  { id: 2, name: 'Vacation — Europe', target: 150000, current: 42000, icon: '✈️', color: '#4d9fff' },
+  { id: 3, name: 'MacBook Pro', target: 180000, current: 60000, icon: '💻', color: '#c47eff' },
 ];
 
 export const initialState = {
-  role:        'admin',
-  page:        'overview',
-  filter:      'all',
-  catFilter:   'all',
-  search:      '',
-  sortBy:      'date',
-  sortDir:     -1,
-  theme:       savedTheme,
-  sidebarOpen: false,
-  dateRange:   'all',
-  transactions: savedTxs || INITIAL_TRANSACTIONS,
-  budgets:     savedBudgets || DEFAULT_BUDGETS,
-  goals:       savedGoals  || DEFAULT_GOALS,
-  toasts:      [],
+  role:            'admin',
+  page:            'overview',
+  filter:          'all',
+  catFilter:       'all',
+  recurringFilter: 'all',   // 'all' | 'recurring' | 'one-time'
+  search:          '',
+  sortBy:          'date',
+  sortDir:         -1,
+  theme:           savedTheme,
+  sidebarOpen:     false,
+  dateRange:       'all',
+  transactions:    savedTxs || INITIAL_TRANSACTIONS,
+  budgets:         savedBudgets || DEFAULT_BUDGETS,
+  goals:           savedGoals  || DEFAULT_GOALS,
+  toasts:          [],
 };
 
 let toastId = 0;
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'SET_ROLE':        return { ...state, role: action.payload };
-    case 'SET_PAGE':        return { ...state, page: action.payload, sidebarOpen: false };
-    case 'SET_FILTER':      return { ...state, filter: action.payload };
-    case 'SET_CAT_FILTER':  return { ...state, catFilter: action.payload };
-    case 'SET_SEARCH':      return { ...state, search: action.payload };
-    case 'SET_DATE_RANGE':  return { ...state, dateRange: action.payload };
-    case 'TOGGLE_SIDEBAR':  return { ...state, sidebarOpen: !state.sidebarOpen };
-    case 'CLOSE_SIDEBAR':   return { ...state, sidebarOpen: false };
+    case 'SET_ROLE':             return { ...state, role: action.payload };
+    case 'SET_PAGE':             return { ...state, page: action.payload, sidebarOpen: false };
+    case 'SET_FILTER':           return { ...state, filter: action.payload };
+    case 'SET_CAT_FILTER':       return { ...state, catFilter: action.payload };
+    case 'SET_RECURRING_FILTER': return { ...state, recurringFilter: action.payload };
+    case 'SET_SEARCH':           return { ...state, search: action.payload };
+    case 'SET_DATE_RANGE':       return { ...state, dateRange: action.payload };
+    case 'TOGGLE_SIDEBAR':       return { ...state, sidebarOpen: !state.sidebarOpen };
+    case 'CLOSE_SIDEBAR':        return { ...state, sidebarOpen: false };
     case 'TOGGLE_THEME': {
       const next = state.theme === 'dark' ? 'light' : 'dark';
       localStorage.setItem('ft_theme', next);
@@ -70,6 +72,29 @@ function reducer(state, action) {
       const txs = state.transactions.map(t =>
         t.id === action.payload.id ? { ...t, ...action.payload } : t
       );
+      localStorage.setItem('ft_txs', JSON.stringify(txs));
+      return { ...state, transactions: txs };
+    }
+    // Inline note edit without opening full modal
+    case 'SET_TX_NOTE': {
+      const txs = state.transactions.map(t =>
+        t.id === action.payload.id ? { ...t, note: action.payload.note } : t
+      );
+      localStorage.setItem('ft_txs', JSON.stringify(txs));
+      return { ...state, transactions: txs };
+    }
+    // Toggle recurring flag inline
+    case 'TOGGLE_TX_RECURRING': {
+      const txs = state.transactions.map(t =>
+        t.id === action.payload ? { ...t, recurring: !t.recurring } : t
+      );
+      localStorage.setItem('ft_txs', JSON.stringify(txs));
+      return { ...state, transactions: txs };
+    }
+    // Bulk delete selected transaction IDs
+    case 'BULK_DELETE_TX': {
+      const ids = new Set(action.payload);
+      const txs = state.transactions.filter(t => !ids.has(t.id));
       localStorage.setItem('ft_txs', JSON.stringify(txs));
       return { ...state, transactions: txs };
     }

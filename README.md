@@ -1,22 +1,11 @@
 # FinTrack Pro — Finance Dashboard
 
-> A premium personal finance dashboard built for the **Zorvyn FinTech Frontend Developer Intern** assignment.  
-> Designed to demonstrate senior-level frontend architecture, pixel-perfect UI, and thoughtful UX decision-making.
+> Built for the **Zorvyn FinTech Frontend Developer Intern** assignment.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-000?style=flat&logo=vercel&logoColor=white)](https://fintrack-pro-v3.vercel.app)
 [![GitHub](https://img.shields.io/badge/Repo-GitHub-181717?style=flat&logo=github)](https://github.com/SriSaiKrishna18/Fintrack)
-[![React](https://img.shields.io/badge/React-18.2-61dafb?style=flat&logo=react)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-5.0-646cff?style=flat&logo=vite)](https://vitejs.dev)
-[![Recharts](https://img.shields.io/badge/Recharts-2.10-8884d8?style=flat)](https://recharts.org)
 
----
-
-## 🔗 Links
-
-| Resource | URL |
-|---|---|
-| **Live Demo** | [https://fintrack-pro-v3.vercel.app](https://fintrack-pro-v3.vercel.app) |
-| **GitHub Repo** | [https://github.com/SriSaiKrishna18/Fintrack](https://github.com/SriSaiKrishna18/Fintrack) |
+**🔗 [Live Demo](https://fintrack-pro-v3.vercel.app) · [GitHub](https://github.com/SriSaiKrishna18/Fintrack)**
 
 ---
 
@@ -24,74 +13,68 @@
 
 ```bash
 npm install
-npm run dev        # Start dev server at http://localhost:5173
-npm test           # Run 20 unit tests
-npm run build      # Production build
+npm run dev        # http://localhost:5173
+npm test           # 25 unit tests
+npm run build
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
+---
 
-> **Stack:** React 18 · Recharts · Vite · Vitest · Context API + useReducer · CSS Custom Properties · date-fns
+## My Approach
+
+When I read the assignment I noticed it said *"keep things simple and clear — the goal is to see how you think and build."* So I tried to build something I would actually want to use day-to-day, rather than just a dashboard that checks every requirement box.
+
+A few deliberate choices I made:
+
+**I focused on the "why" behind numbers, not just the numbers.** Most finance dashboards show you totals and call it insights. I wanted mine to answer questions like: *Am I spending more on weekdays or weekends? What percentage of my expenses are locked-in recurring payments vs choices I make each month? How does my actual spending compare to the 50/30/20 rule — not the ideal, but my specific real numbers?*
+
+**Recurring vs one-time is a distinction that actually matters.** ₹35,000 in monthly expenses feels very different if ₹28,000 of that is rent + SIPs + subscriptions you can't easily cut vs if it's all discretionary. I added a recurring flag to every transaction, a filter to isolate them, and a breakdown on the Insights page that shows this split.
+
+**Notes on transactions are under-appreciated.** I personally annotate my bank statements. *"Sale price, was ₹5,499"* or *"Work expense to claim"* — these details disappear in every finance app I've used. So I added inline editable notes directly on the transaction row (no modal needed), and you can even search by note text.
+
+**The health score algorithm is documented and transparent.** I didn't want it to feel like a magic black box. The four pillars (savings rate, budget adherence, income diversity, investment habit) are weighted explicitly and I explain them in the UI itself.
+
+**Two roles, zero backend.** Admin and Viewer modes are simulated entirely on the frontend. The rule was: admin-only UI elements are removed from the DOM entirely (not just disabled), so you can't bypass them by inspecting elements.
 
 ---
 
-## Screenshots
+## Stack
 
-The dashboard ships with **5 full pages**, a comprehensive design system, dark/light themes, and 40 mock transactions seeded across 15 categories.
-
-![FinTrack Pro Dashboard — Dark Mode Overview](preview.png)
+React 18 · Recharts · Vite · Vitest · Context API + useReducer · CSS Custom Properties · date-fns
 
 ---
 
-## Feature Checklist
+## Features
 
-### Core Requirements ✅
-
+### Core
 | Requirement | Implementation |
 |---|---|
-| **Dashboard Overview** | KPI cards (Balance, Income, Expense, Projected EOM), Area chart (time-based), Donut chart (categorical), Category breakdown bars |
-| **Transactions Section** | Full table with Date, Amount, Category, Type; search, type filter, category filter, date range filter; sort by name/date/amount |
-| **Role-Based UI** | Admin: full CRUD (add/edit/delete); Viewer: read-only. Segmented pill switcher in Topbar + Sidebar. Role affects all 5 pages. |
-| **Insights Section** | 6 KPI cards, Monthly comparison bar chart, Category rank chart, Savings Rate trend line with 30% target reference, AI-derived observations with confidence tags |
-| **State Management** | React Context + useReducer pattern. Custom `useFinanceCalc` hook for all derived data using `useMemo`. LocalStorage persistence. |
-| **UI/UX** | Clean design system, responsive grids, empty states, loading animations, keyboard-friendly inputs |
+| Dashboard Overview | KPI cards (Balance, Income, Expense, Projected EOM), Area chart (trend), Donut chart (category), Category breakdown bars |
+| Transactions | Table with Date, Amount, Category, Type, Recurring badge, Inline note. Search (name + category + note), type filter, category filter, recurring filter, sort by name/date/amount |
+| Role-Based UI | Admin: add/edit/delete/annotate/toggle recurring. Viewer: read-only. Pill switcher in Topbar + Sidebar. Role removes elements from DOM (not just disables). |
+| Insights | 6 KPI cards, actual 50/30/20 breakdown (your numbers vs ideal), recurring vs one-time ring chart, day-of-week spending pattern, weekly spend trend, savings rate trend with 30% reference, smart observations |
+| State Management | React Context + useReducer. Custom `useFinanceCalc` with `useMemo`. LocalStorage persistence. |
 
-### Bonus / Optional Features ✅
-
+### Bonus
 | Feature | Details |
 |---|---|
-| **Dark / Light Mode** | Full dual theme via CSS custom properties. Light mode features a premium "Morning Mist" atmospheric design with warm sand/mist/lavender gradient backgrounds, frosted glassmorphism surfaces (backdrop-filter: blur), and refined warm shadows. Theme persisted to localStorage. |
-| **Data Persistence** | Transactions, budgets, and savings goals all saved to localStorage. Survive page refresh. |
-| **CSV + JSON Export** | Both formats available from the Topbar export dropdown. Also available in the Transactions page. |
-| **Budget Tracker** | Full Budgets page: per-category limits, visual progress bars, over-budget alerts, near-limit warnings, best-practice tips. |
-| **Savings Goals** | Dedicated Goals page: create/edit/delete goals, fund deposits, progress rings, milestone tracking, estimated completion time. |
-| **Financial Health Score** | 0–100 score derived from savings rate, budget adherence, income diversity, and investment habit. Displayed as animated SVG ring chart on the Overview. |
-| **Projected Balance** | End-of-month forecast KPI card calculated from average daily spend rate. |
-| **50/30/20 Rule** | Needs/Wants/Savings breakdown shown in Insights and tips in Budgets. |
-| **Animated Counters** | All KPI values animate from 0 on mount using a custom `useCountUp` hook with easing. |
-| **Pagination** | Transactions table paginates at 15 rows per page with smart ellipsis navigation. |
-| **Date Range Filter** | Global filter (All Time / This Month / Last Month / Last 3 Months) affects all charts and metrics. |
-| **Toast System** | Animated toast notifications for every user action (add/edit/delete/export). 4 types: success/error/info/warning. |
-| **Keyboard Shortcuts** | Press `?` to view all shortcuts. `1-5` for page navigation, `T` for theme, `N` for new transaction. |
-| **Welcome Banner** | First-time user onboarding banner with feature highlights. Dismissible, persisted via localStorage. |
-| **Reset Demo Data** | One-click restore of original 40 transactions from the Transactions page for easy evaluation. |
-| **SVG Favicon** | Custom inline SVG favicon matching the brand identity — no external file required. |
-| **JSON Export** | Export filtered transactions as JSON alongside CSV for data portability. |
-| **Unit Tests** | 20 tests covering financial calculations, health score, budget tracking, and chart data using Vitest. |
-
----
-
-## Engineering Decisions
-
-| Decision | Rationale |
-|---|---|
-| **Centralized `useReducer` + Context** | A single `AppContext` with `useReducer` maintains strict unidirectional data flow. Role changes (Admin ↔ Viewer) propagate instantly across all 5 modules without state synchronization bugs. All derived data is computed via `useMemo` in `useFinanceCalc`, ensuring O(n) recalculation only when the transaction array changes. |
-| **CSS Custom Properties over CSS-in-JS** | A single design system file (`index.css`) with 40+ CSS variables enables instant theme switching (dark/light) via a single class toggle on `<html>`. No runtime JS overhead, no FOUC, and full server-side rendering compatibility. |
-| **`localStorage` persistence** | Transactions, budgets, goals, and theme preference persist across sessions using `localStorage` with `useEffect` sync. This mirrors real-world SPA behavior without introducing backend complexity. |
-| **Conditional rendering for RBAC** | Admin-only UI (Add/Edit/Delete buttons, modals) is completely removed from the DOM via `{isAdmin && ...}` — not merely disabled. This prevents DOM inspection bypasses and follows React best practices for role-based UIs. |
-| **`useMemo` for expensive calculations** | The Financial Health Score algorithm, category spending breakdown, budget usage percentages, and chart data are all wrapped in `useMemo` with precise dependency arrays. This prevents unnecessary re-computation when unrelated state changes (e.g., search input typing). |
-| **Counter animation cache** | KPI counter animations run from 0 only on initial load. A module-level cache ensures returning to the Overview page shows numbers instantly — no annoying "slot machine" effect on every navigation. Re-animates only when the underlying data changes. |
-| **Vitest over Jest** | Vitest integrates natively with Vite's module resolution and HMR, eliminating the need for separate Babel/webpack configuration. Tests run in ~150ms. |
+| Dark / Light Mode | Full dual theme via CSS custom properties. Light theme uses a warm sand + mist atmospheric palette with frosted glass cards. |
+| Data Persistence | Transactions, budgets, goals, theme, and recurring flags all survive page refresh. |
+| CSV + JSON Export | Both formats include recurring flag and note fields. Export reflects active filters. |
+| Budget Tracker | Per-category limits, visual progress bars, over-budget alerts, near-limit warnings. |
+| Savings Goals | Create/edit/delete goals, fund deposits, progress rings, estimated completion time. |
+| Financial Health Score | 0–100 across savings rate, budget adherence, income diversity, investment habit. |
+| Projected Balance | End-of-month forecast from average daily spend rate. |
+| Recurring Transaction Management | Flag/unflag recurring inline, filter by recurring/one-time, recurring breakdown on Insights. |
+| Inline Notes | Click-to-edit notes directly on transaction rows. Searchable. |
+| Bulk Delete | Select multiple transactions, delete in one action (Admin only). |
+| Animated Counters | KPI values animate from 0 on first render only. Returns to page show values instantly. |
+| Pagination | 15 rows/page with smart ellipsis. |
+| Date Range Filter | All Time / This Month / Last Month / Last 3 Months. Applies to every metric and chart. |
+| Toast System | 4 types: success/error/info/warning with animation. |
+| Keyboard Shortcuts | Press `?` for full list. `1-5` pages, `T` theme, `N` new transaction. |
+| Welcome Banner | Onboarding banner on first visit, dismissible. |
+| Unit Tests | 25 tests via Vitest covering all financial calculations, health score, and budget tracking. |
 
 ---
 
@@ -100,102 +83,49 @@ The dashboard ships with **5 full pages**, a comprehensive design system, dark/l
 ```
 src/
 ├── context/
-│   └── AppContext.jsx          # Global state + reducer (15+ action types) + toast helper
+│   └── AppContext.jsx          # Global state (useReducer), 18+ action types
 ├── data/
-│   └── mockData.js             # 40 transactions, 15 categories, monthly history
+│   └── mockData.js             # 40 transactions (with recurring + notes), 15 categories, monthly + DOW history
 ├── hooks/
-│   └── useFinanceCalc.js       # All derived finance calculations (memoized)
+│   └── useFinanceCalc.js       # All derived data: totals, health score, recurring stats, DOW pattern, 50/30/20 actual
 ├── test/
-│   ├── setup.js                # Vitest test setup (localStorage mock)
-│   └── useFinanceCalc.test.js  # 20 unit tests for financial calculations
+│   ├── setup.js
+│   └── useFinanceCalc.test.js  # 25 unit tests
 ├── components/
-│   ├── Sidebar.jsx             # Nav (5 items), balance card, sparkline, role toggle, user card
-│   ├── Topbar.jsx              # Page title, date range, theme, export dropdown, role switcher
-│   ├── AddTransactionModal.jsx # Shared add/edit modal with category pills
-│   └── Toast.jsx               # Animated toast notification system
+│   ├── Sidebar.jsx
+│   ├── Topbar.jsx
+│   ├── AddTransactionModal.jsx  # Add/edit with note field + recurring toggle
+│   └── Toast.jsx
 ├── pages/
-│   ├── Overview.jsx            # Health Score ring, KPIs, area chart, donut, category bars, recent activity
-│   ├── Transactions.jsx        # Table with pagination, search, sort, filter, CRUD actions
-│   ├── Insights.jsx            # 50/30/20, monthly comparison, savings trend, AI observations
-│   ├── Budgets.jsx             # Category budget tracker, visual progress, alerts, tips
-│   └── Goals.jsx               # Savings goals with progress rings, deposits, milestones
-├── App.jsx                     # Shell + page routing
-├── main.jsx                    # Entry point
-└── index.css                   # Full design system (900+ lines, tokens, components, animations)
+│   ├── Overview.jsx
+│   ├── Transactions.jsx         # Inline notes, bulk select, recurring filter, recurring toggle per row
+│   ├── Insights.jsx             # DOW pattern, recurring breakdown, weekly spend, actual 50/30/20
+│   ├── Budgets.jsx
+│   └── Goals.jsx
 ```
 
 ---
 
-## Architecture & Design Decisions
+## Assumptions
 
-### State Management
-All application state lives in a single `AppContext` powered by `useReducer`. This gives:
-- **Predictable updates** via pure reducer functions (no mutations)
-- **Single source of truth** — one state tree for role, page, filters, transactions, budgets, and goals
-- **Separation of concerns** — `useFinanceCalc` hook computes all derived data with `useMemo`, keeping components pure
-
-### Component Design Principles
-- **No prop-drilling** — context consumed directly where needed
-- **Composition over complexity** — small focused components (KPICard, BudgetRow, GoalCard)
-- **Responsive by default** — CSS grid with `auto-fit` + `minmax()`, no media query hacks
-
-### Design System
-The entire visual identity is built on **CSS Custom Properties** (design tokens):
-- **40+ tokens** covering backgrounds, borders, text, colors, shadows, gradients, radius, timing
-- **Two complete themes** (dark/light) — switching just toggles a class on `<html>`
-- **Two complete themes** (dark/light) — switching just toggles a class on `<html>`. Light mode features the "Morning Mist" atmospheric palette (warm sand → cool mist → soft lavender gradient) with frosted glassmorphism surfaces.
-- **Semantic Typography**: DM Mono for all tabular and financial data (prevents kerning jitter on value updates), DM Sans for UI elements in light mode, Playfair Display for editorial warmth in branding. Inter + JetBrains Mono in dark mode.
-- **Color palette**: Dark — deep navy (`#04070e`) base, electric teal (`#00f0c8`) accent. Light — warm sand (`#f5f0ea`) base, emerald (`#2d8a6e`) accent, slate (`#4a6080`) secondary, rose (`#c45a5a`) danger, amber (`#b8762a`) warning, lavender (`#6e5a9a`) projections.
-
-### Financial Health Score Algorithm
-The score (0–100) weighs four pillars:
-1. **Savings Rate** (35 pts) — 30%+ = full score, tiered down to 0%
-2. **Budget Adherence** (25 pts) — pro-rated by fraction of categories under limit
-3. **Income Diversity** (20 pts) — 3+ income sources = full score, 1 source = 7 pts
-4. **Investment Habit** (20 pts) — 15%+ of income invested = full score
-
-### Role-Based UI
-The segmented role switcher (visible in both Topbar and Sidebar) changes:
-- **Admin**: Add, Edit, Delete transactions; Edit budgets; Create/Delete savings goals; Fund deposit modal
-- **Viewer**: Read-only across all 5 pages; informational banner in Transactions
-
-### Performance Considerations
-- All expensive calculations wrapped in `useMemo` (totals, filtered list, category spend, budget usage, health score)
-- Page-level keys cause full component unmount on navigation → clean animation re-triggers without stale state
-- Animated counters use `requestAnimationFrame` with easing, not `setInterval`
+1. *"Mock API integration"* is satisfied by `mockData.js` — no artificial loading delays since they'd hurt the demo experience.
+2. The global date range filter applies to all metrics, not just the transaction list. This makes it genuinely useful.
+3. Budget data is pre-seeded so the Budgets page demonstrates value immediately.
+4. The Financial Health Score is a frontend heuristic, not financial advice.
+5. The day-of-week spending pattern uses data from actual mock transactions, not fabricated values.
 
 ---
 
-## Mock Data
+## Design Decisions
 
-**40 transactions** across **15 categories** spanning 4 months (Jan–Apr 2026):
+**CSS Custom Properties over CSS-in-JS.** A single 40+ variable design system in `index.css` lets me switch themes with a single class toggle on `<html>`. No flash of unstyled content, no runtime overhead.
 
-| Income Sources | Expense Categories |
-|---|---|
-| Salary, Freelance, Investment | Food, Transport, Shopping, Health, Bills, Entertainment, Groceries, Education, Travel, Dining, Insurance, Rent |
+**useMemo on every derived value.** Totals, filtered lists, category breakdowns, budget usage percentages, health score — all wrapped with precise dependency arrays. Typing in the search box doesn't recompute the health score.
 
-**Monthly history**: 7 months of historical data (Sep 2025 – Mar 2026) drives all trend charts.
+**Counter animation cache.** KPI numbers animate from 0 only on initial load. A module-level cache prevents the "slot machine" effect every time you navigate back to the Overview.
 
----
-
-## Assumptions Made
-
-1. "Mock API integration" is satisfied by `mockData.js` as the data source — no actual API calls are needed per assignment scope, and the 3-second artificial delay common in mock API simulations would hurt UX here.
-2. The Global Date Range filter applies to **all metrics** (totals, charts, category breakdown), not just the transactions table — this gives a much more powerful filtering experience.
-3. Budget data is pre-seeded with reasonable defaults so the Budgets page demonstrates real value immediately without needing setup.
-4. The Financial Health Score is a frontend heuristic — not financial advice. The algorithm weights are opinionated but well-reasoned and documented.
-5. "Highest spending category" in Insights is calculated from the **current date range** — switching to "This Month" updates it automatically.
+**DOM removal for RBAC.** Admin-only elements use `{isAdmin && ...}`, not `disabled` or `display: none`. This is the correct React pattern for role-based UI.
 
 ---
 
-## Known Limitations
-
-- No actual backend — all data is mock/localStorage
-- Charts do not animate on data update (Recharts limitation without additional plugins)
-- The sparkline in the Sidebar shows semi-mock data (7-month trend heights are approximate)
-
----
-
-*Built by **Sri Sai Krishna** · Zorvyn FinTech Frontend Developer Intern Assignment · April 2026*
-
-**🔗 [Live Demo](https://fintrack-pro-v3.vercel.app) · [GitHub](https://github.com/SriSaiKrishna18/Fintrack)**
+*Built by **Sri Sai Krishna** · April 2026*
