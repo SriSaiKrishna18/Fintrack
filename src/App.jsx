@@ -1,13 +1,14 @@
-import { useEffect, useState, useCallback } from 'react';
+import { lazy, Suspense, useEffect, useState, useCallback } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import ToastContainer from './components/Toast';
-import Overview from './pages/Overview';
-import Transactions from './pages/Transactions';
-import Insights from './pages/Insights';
-import Budgets from './pages/Budgets';
-import Goals from './pages/Goals';
+
+const Overview = lazy(() => import('./pages/Overview'));
+const Transactions = lazy(() => import('./pages/Transactions'));
+const Insights = lazy(() => import('./pages/Insights'));
+const Budgets = lazy(() => import('./pages/Budgets'));
+const Goals = lazy(() => import('./pages/Goals'));
 
 const PAGE_KEYS = { '1': 'overview', '2': 'transactions', '3': 'insights', '4': 'budgets', '5': 'goals' };
 const SHORTCUT_LIST = [
@@ -18,7 +19,9 @@ const SHORTCUT_LIST = [
   { key: 'Esc', desc: 'Close modals' },
 ];
 
-function KeyboardShortcutsModal({ onClose }) {
+function KeyboardShortcutsModal({ onClose, theme }) {
+  const kbdFont = theme === 'light' ? "'DM Mono',monospace" : "'JetBrains Mono',monospace";
+
   return (
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal" style={{ maxWidth: 400 }}>
@@ -37,7 +40,7 @@ function KeyboardShortcutsModal({ onClose }) {
             <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 4px', borderBottom: '1px solid var(--b-xs)' }}>
               <span style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 500 }}>{desc}</span>
               <kbd style={{
-                fontFamily: state.theme === 'light' ? "'DM Mono',monospace" : "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
+                fontFamily: kbdFont, fontSize: 11, fontWeight: 700,
                 padding: '3px 10px', borderRadius: 8,
                 background: 'var(--bg-elevated)', border: '1px solid var(--b-md)',
                 color: 'var(--accent)', boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
@@ -45,6 +48,19 @@ function KeyboardShortcutsModal({ onClose }) {
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PageLoading() {
+  return (
+    <div className="card card-p anim-in" role="status" aria-live="polite">
+      <div className="lbl" style={{ marginBottom: 10 }}>Loading page</div>
+      <div style={{ display: 'grid', gap: 10 }}>
+        <div style={{ height: 12, borderRadius: 6, background: 'var(--bg-elevated)', width: '45%' }} />
+        <div style={{ height: 10, borderRadius: 6, background: 'var(--bg-elevated)', width: '85%' }} />
+        <div style={{ height: 10, borderRadius: 6, background: 'var(--bg-elevated)', width: '70%' }} />
       </div>
     </div>
   );
@@ -103,7 +119,9 @@ function AppShell() {
   }, [handleKeyDown]);
 
   return (
-    <div className="app-shell">
+    <>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <div className="app-shell">
       {/* Background decorations */}
       <div className="bg-mesh" />
       <div className="grid-overlay" />
@@ -121,20 +139,23 @@ function AppShell() {
       <div className="main-area">
         <Topbar />
         <main id="main-content" key={state.page} className="page-scroll anim-up d-0">
-          <Page />
+          <Suspense fallback={<PageLoading />}>
+            <Page />
+          </Suspense>
         </main>
       </div>
 
       <ToastContainer />
 
       {/* Keyboard shortcuts modal */}
-      {showShortcuts && <KeyboardShortcutsModal onClose={() => setShowShortcuts(false)} />}
+      {showShortcuts && <KeyboardShortcutsModal theme={state.theme} onClose={() => setShowShortcuts(false)} />}
 
       {/* Keyboard hint */}
       <div className="kbd-hint" title="Press ? for shortcuts" onClick={() => setShowShortcuts(true)}>
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/><path d="M4 4V3a4 4 0 018 0v1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><circle cx="8" cy="9" r="1.5" fill="currentColor"/></svg>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

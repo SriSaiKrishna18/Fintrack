@@ -113,9 +113,8 @@ export default function Budgets() {
   };
 
   const resetAll = () => {
-    localStorage.removeItem('ft_budgets');
+    dispatch({ type: 'RESET_BUDGETS' });
     toast?.('Budgets reset to defaults', 'success');
-    window.location.reload();
   };
 
   return (

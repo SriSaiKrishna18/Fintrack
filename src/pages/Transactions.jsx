@@ -1,10 +1,14 @@
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { useFinanceCalc } from '../hooks/useFinanceCalc';
 import { CATEGORIES } from '../data/mockData';
 import TransactionModal from '../components/AddTransactionModal';
 
 const fmt = (n) => '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN');
+const csvEscape = (value) => {
+  const str = String(value ?? '');
+  return `"${str.replace(/"/g, '""')}"`;
+};
 
 function SortArrow({ active, dir }) {
   return (
@@ -112,6 +116,13 @@ export default function Transactions() {
   const totalPages = Math.ceil(filteredTxs.length / PER_PAGE);
   const pageTxs    = filteredTxs.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
+  useEffect(() => {
+    setPage(prev => {
+      const safeTotal = Math.max(1, totalPages);
+      return prev > safeTotal ? safeTotal : prev;
+    });
+  }, [totalPages]);
+
   const sort     = (key) => { dispatch({ type: 'SET_SORT', payload: key }); setPage(1); };
   const clearAll = () => {
     dispatch({ type: 'SET_SEARCH',           payload: '' });
@@ -150,7 +161,7 @@ export default function Transactions() {
   const exportCSV = () => {
     const rows = [
       ['ID','Date','Description','Category','Type','Amount (INR)','Recurring','Note'],
-      ...filteredTxs.map(t => [t.id, t.date, `"${t.name}"`, t.cat, t.type, t.amount, t.recurring ? 'Yes':'No', `"${t.note||''}"` ]),
+      ...filteredTxs.map(t => [t.id, t.date, csvEscape(t.name), t.cat, t.type, t.amount, t.recurring ? 'Yes':'No', csvEscape(t.note || '')]),
     ];
     const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'fintrack_transactions.csv' });
@@ -257,6 +268,7 @@ export default function Transactions() {
             </svg>
             <input
               className="input"
+              aria-label="Search transactions"
               placeholder="Search by name, category, or note…"
               value={state.search}
               onChange={e => { dispatch({ type: 'SET_SEARCH', payload: e.target.value }); setPage(1); }}
@@ -352,6 +364,7 @@ export default function Transactions() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <input
                 type="checkbox"
+                aria-label="Select all transactions on current page"
                 checked={pageTxs.length > 0 && selected.size === pageTxs.length}
                 onChange={toggleSelectAll}
                 style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--accent)' }}
@@ -401,6 +414,7 @@ export default function Transactions() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <input
                       type="checkbox"
+                      aria-label={`Select transaction ${tx.name}`}
                       checked={isSelected}
                       onChange={() => toggleSelect(tx.id)}
                       style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--accent)' }}
@@ -482,7 +496,8 @@ export default function Transactions() {
             {totalPages > 1 && (
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-                  style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--r-sm)', border: '1px solid var(--b-sm)', background: page <= 1 ? 'transparent' : 'var(--bg-elevated)', color: page <= 1 ? 'var(--t4)' : 'var(--t2)', cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+                  style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--r-sm)', border: '1px solid var(--b-sm)', background: page <= 1 ? 'transparent' : 'var(--bg-elevated)', color: page <= 1 ? 'var(--t4)' : 'var(--t2)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.35 : 1, pointerEvents: page <= 1 ? 'none' : 'auto' }}
+                  aria-label="Previous page"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
@@ -497,7 +512,8 @@ export default function Transactions() {
                 ))}
                 <button
                   onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}
-                  style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--r-sm)', border: '1px solid var(--b-sm)', background: page >= totalPages ? 'transparent' : 'var(--bg-elevated)', color: page >= totalPages ? 'var(--t4)' : 'var(--t2)', cursor: page >= totalPages ? 'not-allowed' : 'pointer' }}
+                  style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--r-sm)', border: '1px solid var(--b-sm)', background: page >= totalPages ? 'transparent' : 'var(--bg-elevated)', color: page >= totalPages ? 'var(--t4)' : 'var(--t2)', cursor: page >= totalPages ? 'not-allowed' : 'pointer', opacity: page >= totalPages ? 0.35 : 1, pointerEvents: page >= totalPages ? 'none' : 'auto' }}
+                  aria-label="Next page"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>

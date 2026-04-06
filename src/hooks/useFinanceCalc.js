@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { MONTHLY_HISTORY, DOW_PATTERN } from '../data/mockData';
+import { MONTHLY_HISTORY } from '../data/mockData';
 
 function getDateRange(key) {
   const now = new Date();
@@ -15,6 +15,7 @@ function getDateRange(key) {
 
 export function useFinanceCalc() {
   const { state } = useApp();
+  const currentMonthLabel = new Date().toLocaleDateString('en-IN', { month: 'short' });
 
   const baseTxs = useMemo(() => {
     const range = getDateRange(state.dateRange);
@@ -124,9 +125,9 @@ export function useFinanceCalc() {
   const fullChartData = useMemo(() => {
     return [
       ...MONTHLY_HISTORY,
-      { month: 'Apr', income: totals.income, expense: totals.expense, savings: totals.balance },
+      { month: currentMonthLabel, income: totals.income, expense: totals.expense, savings: totals.balance },
     ];
-  }, [totals]);
+  }, [totals, currentMonthLabel]);
 
   // ── NEW: Recurring vs One-time breakdown ──
   const recurringStats = useMemo(() => {

@@ -32,7 +32,7 @@ function Toast({ toast }) {
 export default function ToastContainer() {
   const { state } = useApp();
   return (
-    <div className="toast-wrap">
+    <div className="toast-wrap" aria-live="polite" aria-atomic="true">
       {state.toasts.map(t => <Toast key={t.id} toast={t} />)}
     </div>
   );

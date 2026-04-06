@@ -78,6 +78,53 @@ React 18 · Recharts · Vite · Vitest · Context API + useReducer · CSS Custom
 
 ---
 
+## Evaluation Mapping (Explicit)
+
+This section maps implementation directly to the assignment rubric so reviewers can verify quickly.
+
+1. **Design & Creativity**
+   - Warm/cool dual-theme visual language, glass-style cards, custom chart tooltips, and guided reviewer tour banner on Overview.
+2. **Responsiveness**
+   - Mobile sidebar overlay, responsive chart/card grids, compact topbar behavior, and transaction card layout under 768px.
+3. **Functionality**
+   - Dashboard KPIs + trend/categorical charts, full transactions CRUD + search/filter/sort/export, role-based UI simulation.
+4. **User Experience**
+   - Empty states, quick actions, keyboard shortcuts (`1-5`, `T`, `N`, `?`), toast feedback, pagination, guided walkthrough CTA.
+5. **Technical Quality**
+   - Modular page/components structure, derived data centralized in `useFinanceCalc`, reducer-driven global state, and page-level lazy loading via `React.lazy` + `Suspense`.
+6. **State Management**
+   - Context + `useReducer`; persisted keys include transactions, budgets, goals, theme, role, and date range.
+7. **Documentation**
+   - This README includes setup, architecture, assumptions, design rationale, and rubric mapping.
+8. **Attention to Detail**
+   - CSV escaping for quotes, page clamping after filtering, accessibility improvements (`Skip to content`, `aria-live` toasts), graceful no-data handling.
+
+---
+
+## 90-Second Demo Flow
+
+If you want to evaluate quickly, use this exact sequence:
+
+1. Open **Overview** and use **Reviewer Tour** buttons.
+2. Switch **Admin -> Viewer** and confirm action controls disappear.
+3. Go to **Transactions**: search by note, apply recurring filter, sort amount, export CSV/JSON.
+4. Open **Insights**: verify 50/30/20, recurring vs one-time, day-of-week and monthly trends.
+5. Open **Budgets/Goals**: edit a budget, add goal funds, and refresh to confirm persistence.
+
+---
+
+## Submission Note (Ready to Paste)
+
+Hello Team,
+
+I built this assignment as a frontend-focused finance dashboard with emphasis on clean UI, interaction quality, and clear state management. It includes all core requirements (overview + charts, transactions with filter/sort/search, role-based frontend UI, insights, and managed app state), along with optional enhancements like theme toggle, persistence, exports, keyboard shortcuts, and testing.
+
+To evaluate quickly, please use the "90-second reviewer tour" on the Overview page and then check the "Evaluation Mapping" section in this README, where each rubric criterion is mapped directly to implemented features.
+
+Thank you for reviewing my submission.
+
+---
+
 ## Project Structure
 
 ```

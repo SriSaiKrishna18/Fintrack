@@ -4,6 +4,8 @@ import { INITIAL_TRANSACTIONS } from '../data/mockData';
 const AppContext = createContext(null);
 
 const savedTheme   = localStorage.getItem('ft_theme')   || 'dark';
+const savedRole    = localStorage.getItem('ft_role')    || 'admin';
+const savedRange   = localStorage.getItem('ft_range')   || 'all';
 const savedTxs     = JSON.parse(localStorage.getItem('ft_txs')     || 'null');
 const savedBudgets = JSON.parse(localStorage.getItem('ft_budgets') || 'null');
 const savedGoals   = JSON.parse(localStorage.getItem('ft_goals')   || 'null');
@@ -22,7 +24,7 @@ const DEFAULT_GOALS = [
 ];
 
 export const initialState = {
-  role:            'admin',
+  role:            savedRole,
   page:            'overview',
   filter:          'all',
   catFilter:       'all',
@@ -32,7 +34,7 @@ export const initialState = {
   sortDir:         -1,
   theme:           savedTheme,
   sidebarOpen:     false,
-  dateRange:       'all',
+  dateRange:       savedRange,
   transactions:    savedTxs || INITIAL_TRANSACTIONS,
   budgets:         savedBudgets || DEFAULT_BUDGETS,
   goals:           savedGoals  || DEFAULT_GOALS,
@@ -43,13 +45,19 @@ let toastId = 0;
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'SET_ROLE':             return { ...state, role: action.payload };
+    case 'SET_ROLE': {
+      localStorage.setItem('ft_role', action.payload);
+      return { ...state, role: action.payload };
+    }
     case 'SET_PAGE':             return { ...state, page: action.payload, sidebarOpen: false };
     case 'SET_FILTER':           return { ...state, filter: action.payload };
     case 'SET_CAT_FILTER':       return { ...state, catFilter: action.payload };
     case 'SET_RECURRING_FILTER': return { ...state, recurringFilter: action.payload };
     case 'SET_SEARCH':           return { ...state, search: action.payload };
-    case 'SET_DATE_RANGE':       return { ...state, dateRange: action.payload };
+    case 'SET_DATE_RANGE': {
+      localStorage.setItem('ft_range', action.payload);
+      return { ...state, dateRange: action.payload };
+    }
     case 'TOGGLE_SIDEBAR':       return { ...state, sidebarOpen: !state.sidebarOpen };
     case 'CLOSE_SIDEBAR':        return { ...state, sidebarOpen: false };
     case 'TOGGLE_THEME': {
@@ -110,6 +118,10 @@ function reducer(state, action) {
       const budgets = { ...state.budgets, [action.payload.cat]: action.payload.amount };
       localStorage.setItem('ft_budgets', JSON.stringify(budgets));
       return { ...state, budgets };
+    }
+    case 'RESET_BUDGETS': {
+      localStorage.removeItem('ft_budgets');
+      return { ...state, budgets: DEFAULT_BUDGETS };
     }
     case 'UPDATE_GOAL': {
       const goals = state.goals.map(g =>

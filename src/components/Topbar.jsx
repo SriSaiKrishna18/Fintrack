@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 
 const PAGE_META = {
-  overview:     { title: 'Overview',     icon: '◼', sub: 'Financial summary · April 2026'     },
+  overview:     { title: 'Overview',     icon: '◼', sub: 'Financial summary'                   },
   transactions: { title: 'Transactions', icon: '⟷', sub: 'All records · filter & sort'        },
   insights:     { title: 'Insights',     icon: '↗', sub: 'Spending patterns & analytics'       },
   budgets:      { title: 'Budgets',      icon: '◎', sub: 'Category budget tracker'             },
   goals:        { title: 'Goals',        icon: '🎯', sub: 'Savings milestones & progress'      },
 };
+
+function getGreeting(hour) {
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
 
 function exportCSV(transactions) {
   const rows = [
@@ -31,6 +37,16 @@ export default function Topbar() {
   const isDark = state.theme === 'dark';
   const isLight = state.theme === 'light';
   const [showExport, setShowExport] = useState(false);
+  const [titleFade, setTitleFade] = useState(false);
+  const now = new Date();
+  const greeting = getGreeting(now.getHours());
+  const dateLabel = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  useEffect(() => {
+    setTitleFade(true);
+    const id = setTimeout(() => setTitleFade(false), 150);
+    return () => clearTimeout(id);
+  }, [state.page]);
 
   return (
     <header className="topbar">
@@ -50,14 +66,26 @@ export default function Topbar() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--accent-bg)', border: '1px solid rgba(0,240,200,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: 'var(--accent)', fontWeight: 800, flexShrink: 0 }}>{meta.icon}</div>
-            <h1 style={{ fontSize: 15, fontWeight: isLight ? 600 : 800, letterSpacing: '-0.4px', color: 'var(--t1)', fontFamily: isLight ? "'DM Sans', sans-serif" : "'Inter', sans-serif" }}>{meta.title}</h1>
+            <h1 className={titleFade ? 'title-fade' : ''} style={{ fontSize: 15, fontWeight: isLight ? 600 : 800, letterSpacing: '-0.4px', color: 'var(--t1)', fontFamily: isLight ? "'DM Sans', sans-serif" : "'Inter', sans-serif" }}>{meta.title}</h1>
           </div>
-          <p style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2, fontWeight: 500, marginLeft: 36 }}>{meta.sub}</p>
+          <p style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2, fontWeight: 500, marginLeft: 36 }}>{greeting}, Sri · {meta.sub}</p>
         </div>
       </div>
 
       {/* Right */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <div className="topbar-date" style={{
+          fontSize: 11,
+          color: 'var(--t3)',
+          padding: '7px 10px',
+          borderRadius: 10,
+          border: '1px solid var(--b-sm)',
+          background: 'var(--bg-elevated)',
+          whiteSpace: 'nowrap',
+        }}>
+          {dateLabel}
+        </div>
+
         {/* Date range */}
         <select
           className="input"

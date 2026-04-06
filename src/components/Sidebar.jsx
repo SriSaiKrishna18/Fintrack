@@ -165,6 +165,21 @@ export default function Sidebar() {
         <StatRow label="Saved"    value={fmt(totals.balance)} color={totals.balance >= 0 ? 'var(--income)' : 'var(--expense)'} />
       </div>
 
+      <div className="mobile-role-switch">
+        <button
+          className={`mobile-role-btn${state.role === 'admin' ? ' active-admin' : ''}`}
+          onClick={() => dispatch({ type: 'SET_ROLE', payload: 'admin' })}
+        >
+          Admin
+        </button>
+        <button
+          className={`mobile-role-btn${state.role === 'viewer' ? ' active-viewer' : ''}`}
+          onClick={() => dispatch({ type: 'SET_ROLE', payload: 'viewer' })}
+        >
+          Viewer
+        </button>
+      </div>
+
       {/* User + Role */}
       <div style={{ marginTop: 'auto', padding: '12px 14px 14px', borderTop: '1px solid var(--b-xs)' }}>
         <div style={{ display: 'flex', gap: 4, marginBottom: 8, padding: '0 2px' }}>

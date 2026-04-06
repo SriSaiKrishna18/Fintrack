@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { useFinanceCalc } from '../hooks/useFinanceCalc';
+import { useEffect, useState } from 'react';
 import { CATEGORIES, MONTHLY_HISTORY } from '../data/mockData';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -31,6 +31,37 @@ function ChartTip({ active, payload, label }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function ChartSkeleton({ height }) {
+  return <div className="skeleton" style={{ height }} aria-hidden="true" />;
+}
+
+function ChartMount({ height, children }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const id = setTimeout(() => setReady(true), 160);
+    return () => clearTimeout(id);
+  }, []);
+
+  return ready ? children : <ChartSkeleton height={height} />;
+}
+
+function StatusGlyph({ color, tag }) {
+  const glyph = tag === 'Alert' ? '!' : tag === 'Warning' ? '~' : tag === 'Tip' ? '?' : '+';
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="7" fill={color} fillOpacity="0.18" stroke={color} strokeOpacity="0.38" />
+      <path d="M8 4.3v4.7" stroke={color} strokeWidth="1.6" strokeLinecap="round" opacity={glyph === '!' ? 1 : 0} />
+      <circle cx="8" cy="11.6" r="0.9" fill={color} opacity={glyph === '!' ? 1 : 0} />
+      <path d="M4.4 8h7.2" stroke={color} strokeWidth="1.6" strokeLinecap="round" opacity={glyph === '+' ? 1 : 0} />
+      <path d="M8 4.4v7.2" stroke={color} strokeWidth="1.6" strokeLinecap="round" opacity={glyph === '+' ? 1 : 0} />
+      <path d="M5 10.8c1.9-1.6 4.1-1.6 6 0" stroke={color} strokeWidth="1.5" strokeLinecap="round" opacity={glyph === '~' ? 1 : 0} />
+      <path d="M8 5.1c1.3 0 2.3.8 2.3 2 0 1.4-1.4 1.6-2.1 2.6" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity={glyph === '?' ? 1 : 0} />
+      <circle cx="8" cy="11.8" r="0.8" fill={color} opacity={glyph === '?' ? 1 : 0} />
+    </svg>
   );
 }
 
@@ -220,12 +251,14 @@ export default function Insights() {
 
   const monthlyData = fullChartData.slice(-5);
 
+  const currentMonthLabel = new Date().toLocaleDateString('en-IN', { month: 'short' });
+
   const savingsTrend = MONTHLY_HISTORY.map(m => ({
     month: m.month,
     rate: Math.round((m.income - m.expense) / m.income * 100),
     savings: m.income - m.expense,
   }));
-  savingsTrend.push({ month: 'Apr', rate: savingsRate, savings: totals.balance });
+  savingsTrend.push({ month: currentMonthLabel, rate: savingsRate, savings: totals.balance });
 
   const catBarData = categorySpend.map(([cat, val]) => ({
     name: cat, value: val, color: CATEGORIES[cat]?.color || '#888',
@@ -330,19 +363,21 @@ export default function Insights() {
         <div className="card card-p anim-up d-7">
           <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.3px', marginBottom: 4 }}>Weekly Spend Trend</div>
           <div style={{ fontSize: 11, color: 'var(--t3)', marginBottom: 18 }}>Rolling 8-week expense total</div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={weeklySpend} barCategoryGap="30%" margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
+          <ChartMount height={180}>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={weeklySpend} barCategoryGap="30%" margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-              <XAxis dataKey="week" tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
-              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 9.5 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="week" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+                <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t2)', fontSize: 11.5 }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)' }} />
               <Bar dataKey="amount" name="Spent" radius={[5, 5, 0, 0]}>
                 {weeklySpend.map((_, i) => (
                   <Cell key={i} fill="var(--blue)" fillOpacity={0.55 + (i / weeklySpend.length) * 0.4} />
                 ))}
               </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartMount>
         </div>
       </div>
 
@@ -398,16 +433,18 @@ export default function Insights() {
               </div>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={monthlyData} barCategoryGap="28%" barGap={4} margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
+          <ChartMount height={250}>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={monthlyData} barCategoryGap="28%" barGap={4} margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 11, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
-              <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="month" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+                <YAxis tickFormatter={fmtSh} tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)', radius: 6 }} />
               <Bar dataKey="income"  fill="var(--income)"  fillOpacity={0.75} radius={[6, 6, 0, 0]} name="Income" />
               <Bar dataKey="expense" fill="var(--expense)" fillOpacity={0.65} radius={[6, 6, 0, 0]} name="Expense" />
-            </BarChart>
-          </ResponsiveContainer>
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartMount>
         </div>
 
         {/* Category horizontal bars */}
@@ -417,19 +454,21 @@ export default function Insights() {
           {catBarData.length === 0 ? (
             <div className="empty-state"><div className="empty-icon">📭</div><div style={{ fontSize: 13, color: 'var(--t3)' }}>No expenses</div></div>
           ) : (
-            <ResponsiveContainer width="100%" height={Math.max(220, catBarData.length * 34)}>
-              <BarChart data={catBarData} layout="vertical" barCategoryGap="22%" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
+            <ChartMount height={Math.max(220, catBarData.length * 34)}>
+              <ResponsiveContainer width="100%" height={Math.max(220, catBarData.length * 34)}>
+                <BarChart data={catBarData} layout="vertical" barCategoryGap="22%" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" horizontal={false} />
-                <XAxis type="number" tickFormatter={fmtSh} tick={{ fill: 'var(--t3)', fontSize: 9.5, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} width={90} />
+                  <XAxis type="number" tickFormatter={fmtSh} tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+                  <YAxis dataKey="name" type="category" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} width={90} />
                 <Tooltip content={<ChartTip />} cursor={{ fill: 'var(--b-xs)' }} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} name="Spent">
                   {catBarData.map((entry, i) => (
                     <Cell key={i} fill={entry.color} fillOpacity={0.8} style={{ filter: `drop-shadow(0 0 5px ${entry.color}40)` }} />
                   ))}
                 </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartMount>
           )}
         </div>
       </div>
@@ -450,25 +489,27 @@ export default function Insights() {
             Now: {savingsRate}%
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={180}>
-          <ComposedChart data={savingsTrend} margin={{ top: 4, right: 8, left: -14, bottom: 0 }}>
+        <ChartMount height={180}>
+          <ResponsiveContainer width="100%" height={180}>
+            <ComposedChart data={savingsTrend} margin={{ top: 4, right: 8, left: -14, bottom: 0 }}>
             <defs>
               <linearGradient id="gSave" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%"   stopColor="var(--accent)" stopOpacity={0.2} />
                 <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
-            <XAxis dataKey="month" tick={{ fill: 'var(--t3)', fontSize: 10.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={6} />
-            <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--t3)', fontSize: 10, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="4 4" stroke="var(--b-xs)" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={6} />
+              <YAxis tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--t2)', fontSize: 11.5, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
             <Tooltip content={<ChartTip />} />
             <ReferenceLine y={30} stroke="var(--green)" strokeDasharray="6 3" strokeOpacity={0.5}
               label={{ value: '30% target', position: 'insideTopRight', fill: 'var(--green)', fontSize: 10, fontFamily: 'Inter', fontWeight: 600 }}
             />
             <Area type="monotone" dataKey="rate" fill="url(#gSave)" stroke="none" name="Savings Rate" />
             <Line type="monotone" dataKey="rate" stroke="var(--accent)" strokeWidth={2.5} dot={{ fill: 'var(--accent)', r: 4, strokeWidth: 0 }} activeDot={{ r: 6, fill: 'var(--accent)', strokeWidth: 0 }} name="Savings Rate" />
-          </ComposedChart>
-        </ResponsiveContainer>
+            </ComposedChart>
+          </ResponsiveContainer>
+        </ChartMount>
       </div>
 
       {/* ── Key Observations ── */}
@@ -483,7 +524,9 @@ export default function Insights() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 10 }}>
           {observations.map((obs, i) => (
             <div key={i} className="obs-card">
-              <div style={{ width: 40, height: 40, borderRadius: 'var(--r-md)', flexShrink: 0, background: obs.color + '18', border: `1px solid ${obs.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{obs.icon}</div>
+              <div style={{ width: 40, height: 40, borderRadius: 'var(--r-md)', flexShrink: 0, background: obs.color + '18', border: `1px solid ${obs.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <StatusGlyph color={obs.color} tag={obs.tag} />
+              </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--t1)' }}>{obs.title}</div>
